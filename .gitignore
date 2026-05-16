@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/generated/prisma
+
+/lib/generated*
+
+# skip agents file
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
