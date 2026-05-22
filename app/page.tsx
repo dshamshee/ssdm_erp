@@ -1,8 +1,11 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export default async function Page() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return (
     <div>
       {/* condition check session exist or not */}
@@ -22,5 +25,12 @@ export default async function Page() {
         </div>
       )}
     </div>
-  )
+  );
+
+  // return (
+  //   <div>
+  //     <LoaderScreen message="User details is loading..." />
+  //     <ErrorDisplay />
+  //   </div>
+  // )
 }
