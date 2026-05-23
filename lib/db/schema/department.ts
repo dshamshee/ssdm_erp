@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { integer, pgTable, varchar, timestamp, boolean, date, check } from "drizzle-orm/pg-core";
 
 // Independent master table 
@@ -11,6 +11,7 @@ export const academicSessionTable = pgTable('academic_session', {
     updatedAt: timestamp().defaultNow().notNull(),
 });
 
+// Add departments Details D card, course card, session
 
 
 // Independent master table 
@@ -31,6 +32,7 @@ export const subjectTable = pgTable('subject', {
     name: varchar({ length: 100 }).notNull(), 
     description: varchar({ length: 255 }).notNull(),
     type: varchar({ length: 30 }).notNull().default('MJC'), 
+    isActive: boolean().default(true),
     hasPractical: boolean().notNull().default(false),
     practicalFee: integer().notNull().default(0),
     // courseId: integer().references(() => courseTable.id, { onDelete: 'cascade' }).notNull(),
@@ -121,7 +123,130 @@ export const feeTable = pgTable('fee', {
 
 
 
-// Something happed here 
-// update 2 here
-// update 3 here
-// Update 4 here / after reject change something to merge
+
+// DEPARTMENT RELATIONS
+
+export const departmentRelations = relations(
+    departmentTable,
+    ({ many }) => ({
+        courses: many(courseTable),
+    })
+);
+
+
+// COURSE RELATIONS
+
+export const courseRelations = relations(
+    courseTable,
+    ({ one, many }) => ({
+        department: one(departmentTable, {
+            fields: [courseTable.departmentId],
+            references: [departmentTable.id],
+        }),
+
+        courseSessions: many(courseSessionTable),
+    })
+);
+
+
+// ACADEMIC SESSION RELATIONS
+
+export const academicSessionRelations = relations(
+    academicSessionTable,
+    ({ many }) => ({
+        courseSessions: many(courseSessionTable),
+    })
+);
+
+
+// COURSE SESSION RELATIONS
+
+export const courseSessionRelations = relations(
+    courseSessionTable,
+    ({ one, many }) => ({
+        course: one(courseTable, {
+            fields: [courseSessionTable.courseId],
+            references: [courseTable.id],
+        }),
+
+        session: one(academicSessionTable, {
+            fields: [courseSessionTable.sessionId],
+            references: [academicSessionTable.id],
+        }),
+
+        batches: many(batchTable),
+
+        semesters: many(semesterTable),
+    })
+);
+
+
+// BATCH RELATIONS
+
+export const batchRelations = relations(
+    batchTable,
+    ({ one }) => ({
+        courseSession: one(courseSessionTable, {
+            fields: [batchTable.courseSessionId],
+            references: [courseSessionTable.id],
+        }),
+    })
+);
+
+
+// SEMESTER RELATIONS
+
+export const semesterRelations = relations(
+    semesterTable,
+    ({ one, many }) => ({
+        courseSession: one(courseSessionTable, {
+            fields: [semesterTable.courseSessionId],
+            references: [courseSessionTable.id],
+        }),
+
+        semesterSubjects: many(semesterSubjectTable),
+
+        fees: many(feeTable),
+    })
+);
+
+
+// SUBJECT RELATIONS
+
+export const subjectRelations = relations(
+    subjectTable,
+    ({ many }) => ({
+        semesterSubjects: many(semesterSubjectTable),
+    })
+);
+
+
+// SEMESTER SUBJECT RELATIONS
+
+export const semesterSubjectRelations = relations(
+    semesterSubjectTable,
+    ({ one }) => ({
+        semester: one(semesterTable, {
+            fields: [semesterSubjectTable.semesterId],
+            references: [semesterTable.id],
+        }),
+
+        subject: one(subjectTable, {
+            fields: [semesterSubjectTable.subjectId],
+            references: [subjectTable.id],
+        }),
+    })
+);
+
+
+// FEE RELATIONS
+
+export const feeRelations = relations(
+    feeTable,
+    ({ one }) => ({
+        semester: one(semesterTable, {
+            fields: [feeTable.semesterId],
+            references: [semesterTable.id],
+        }),
+    })
+);

@@ -1,7 +1,7 @@
 // this file is used to seed entire database initially at once
 import { fakerEN_IN as faker } from '@faker-js/faker';
 import { db } from "@/lib/db";
-import { usersTable } from "@/lib/db/schema/index";
+// import { usersTable } from "@/lib/db/schema/index";
 
 
 function createRandomUser() {
@@ -18,8 +18,8 @@ function createRandomUser() {
 
 async function main() {
     const users = faker.helpers.multiple(createRandomUser, { count: 10});
-    const insertedUsers = await db.insert(usersTable).values(users).returning({ id: usersTable.id });
-    console.log(insertedUsers);
+    // const insertedUsers = await db.insert(usersTable).values(users).returning({ id: usersTable.id });
+    // console.log(insertedUsers);
 
 }
 
