@@ -8,10 +8,13 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 
 // Independent master table
 export const academicSessionTable = pgTable("academic_session", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
   name: varchar({
     length: 30,
   })
@@ -27,7 +30,9 @@ export const academicSessionTable = pgTable("academic_session", {
 
 // Independent master table
 export const departmentTable = pgTable("department", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
   code: varchar({
     length: 10,
   })
@@ -49,7 +54,9 @@ export const departmentTable = pgTable("department", {
 export const subjectTable = pgTable(
   "subject",
   {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    id: varchar({ length: 128 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
     code: varchar({
       length: 10,
     })
@@ -69,8 +76,6 @@ export const subjectTable = pgTable(
     isActive: boolean().default(true),
     hasPractical: boolean().notNull().default(false),
     practicalFee: integer().notNull().default(0),
-    // courseId: integer().references(() => courseTable.id, { onDelete: 'cascade' }).notNull(),
-    // semesterId: integer().references(() => semesterTable.id, { onDelete: 'set null' }),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
   },
@@ -86,7 +91,9 @@ export const subjectTable = pgTable(
 export const courseTable = pgTable(
   "course",
   {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    id: varchar({ length: 128 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
     name: varchar({
       length: 50,
     })
@@ -105,7 +112,7 @@ export const courseTable = pgTable(
     description: varchar({
       length: 255,
     }).notNull(),
-    departmentId: integer()
+    departmentId: varchar({ length: 128 })
       .references(() => departmentTable.id, {
         onDelete: "cascade",
       })
@@ -125,13 +132,15 @@ export const courseTable = pgTable(
 );
 
 export const courseSessionTable = pgTable("course_session", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  courseId: integer()
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  courseId: varchar({ length: 128 })
     .references(() => courseTable.id, {
       onDelete: "cascade",
     })
     .notNull(),
-  sessionId: integer()
+  sessionId: varchar({ length: 128 })
     .references(() => academicSessionTable.id, {
       onDelete: "cascade",
     })
@@ -141,8 +150,10 @@ export const courseSessionTable = pgTable("course_session", {
 });
 
 export const batchTable = pgTable("batch", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  courseSessionId: integer()
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  courseSessionId: varchar({ length: 128 })
     .references(() => courseSessionTable.id, {
       onDelete: "cascade",
     })
@@ -156,8 +167,10 @@ export const batchTable = pgTable("batch", {
 
 // Belongs to a Course
 export const semesterTable = pgTable("semester", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  courseSessionId: integer()
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  courseSessionId: varchar({ length: 128 })
     .references(() => courseSessionTable.id, {
       onDelete: "cascade",
     })
@@ -171,13 +184,15 @@ export const semesterTable = pgTable("semester", {
 });
 
 export const semesterSubjectTable = pgTable("semester_subject", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  semesterId: integer()
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  semesterId: varchar({ length: 128 })
     .references(() => semesterTable.id, {
       onDelete: "cascade",
     })
     .notNull(),
-  subjectId: integer()
+  subjectId: varchar({ length: 128 })
     .references(() => subjectTable.id, {
       onDelete: "cascade",
     })
@@ -188,11 +203,10 @@ export const semesterSubjectTable = pgTable("semester_subject", {
 
 // points directly to the course
 export const feeTable = pgTable("fee", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  // courseId: integer().references(() => courseTable.id, { onDelete: 'cascade' }).notNull().unique(), // Unique ensures 1:1 relationship
-  // sessionId: integer().references(() => sessionTable.id, { onDelete: 'cascade' }).notNull(), // flexible fee for different sessions
-  // courseSessionId: integer().references(() => courseSessionTable.id, { onDelete: 'cascade' }).notNull(),
-  semesterId: integer()
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  semesterId: varchar({ length: 128 })
     .references(() => semesterTable.id, {
       onDelete: "cascade",
     })
@@ -218,12 +232,8 @@ export const departmentRelations = relations(departmentTable, ({ many }) => ({
 
 export const courseRelations = relations(courseTable, ({ one, many }) => ({
   department: one(departmentTable, {
-    fields: [
-      courseTable.departmentId,
-    ],
-    references: [
-      departmentTable.id,
-    ],
+    fields: [courseTable.departmentId],
+    references: [departmentTable.id],
   }),
 
   courseSessions: many(courseSessionTable),
@@ -244,21 +254,13 @@ export const courseSessionRelations = relations(
   courseSessionTable,
   ({ one, many }) => ({
     course: one(courseTable, {
-      fields: [
-        courseSessionTable.courseId,
-      ],
-      references: [
-        courseTable.id,
-      ],
+      fields: [courseSessionTable.courseId],
+      references: [courseTable.id],
     }),
 
     session: one(academicSessionTable, {
-      fields: [
-        courseSessionTable.sessionId,
-      ],
-      references: [
-        academicSessionTable.id,
-      ],
+      fields: [courseSessionTable.sessionId],
+      references: [academicSessionTable.id],
     }),
 
     batches: many(batchTable),
@@ -271,12 +273,8 @@ export const courseSessionRelations = relations(
 
 export const batchRelations = relations(batchTable, ({ one }) => ({
   courseSession: one(courseSessionTable, {
-    fields: [
-      batchTable.courseSessionId,
-    ],
-    references: [
-      courseSessionTable.id,
-    ],
+    fields: [batchTable.courseSessionId],
+    references: [courseSessionTable.id],
   }),
 }));
 
@@ -284,12 +282,8 @@ export const batchRelations = relations(batchTable, ({ one }) => ({
 
 export const semesterRelations = relations(semesterTable, ({ one, many }) => ({
   courseSession: one(courseSessionTable, {
-    fields: [
-      semesterTable.courseSessionId,
-    ],
-    references: [
-      courseSessionTable.id,
-    ],
+    fields: [semesterTable.courseSessionId],
+    references: [courseSessionTable.id],
   }),
 
   semesterSubjects: many(semesterSubjectTable),
@@ -309,21 +303,13 @@ export const semesterSubjectRelations = relations(
   semesterSubjectTable,
   ({ one }) => ({
     semester: one(semesterTable, {
-      fields: [
-        semesterSubjectTable.semesterId,
-      ],
-      references: [
-        semesterTable.id,
-      ],
+      fields: [semesterSubjectTable.semesterId],
+      references: [semesterTable.id],
     }),
 
     subject: one(subjectTable, {
-      fields: [
-        semesterSubjectTable.subjectId,
-      ],
-      references: [
-        subjectTable.id,
-      ],
+      fields: [semesterSubjectTable.subjectId],
+      references: [subjectTable.id],
     }),
   }),
 );
@@ -332,11 +318,7 @@ export const semesterSubjectRelations = relations(
 
 export const feeRelations = relations(feeTable, ({ one }) => ({
   semester: one(semesterTable, {
-    fields: [
-      feeTable.semesterId,
-    ],
-    references: [
-      semesterTable.id,
-    ],
+    fields: [feeTable.semesterId],
+    references: [semesterTable.id],
   }),
 }));

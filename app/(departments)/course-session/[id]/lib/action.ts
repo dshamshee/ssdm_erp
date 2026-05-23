@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 
-export async function fetchSemestersByCourseSession(courseSessionId: number) {
+export async function fetchSemestersByCourseSession(courseSessionId: string) {
     try {
 
         const session = await auth.api.getSession({headers: await headers()});

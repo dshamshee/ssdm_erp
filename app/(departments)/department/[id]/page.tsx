@@ -2,7 +2,7 @@ import { fetchCoursesByDepartment } from "./lib/action"
 
 export default async function DepartmentByIdPage(){
 
-    const result = await fetchCoursesByDepartment(1)
+    const result = await fetchCoursesByDepartment("1")
     console.log(result)
 
     return(

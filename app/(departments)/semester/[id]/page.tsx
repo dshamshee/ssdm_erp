@@ -2,7 +2,7 @@ import { fetchSemesterById } from "./lib/action"
 
 export default async function SemesterByIdPage(){
 
-    const result = await fetchSemesterById(1)
+    const result = await fetchSemesterById("1")
     console.log(result)
 
     return(

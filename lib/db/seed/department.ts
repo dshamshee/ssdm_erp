@@ -20,7 +20,6 @@ const DEPARTMENTS = [
   { code: "MATH", name: "Dept of Mathematics", description: "Pure logic, advanced calculus, linear algebra, and topological studies." },
   { code: "COMP", name: "Dept of Computer Apps", description: "Full-stack development, software engineering, and database systems." },
   { code: "COMM", name: "Dept of Commerce", description: "Corporate accounting, financial management, tax laws, and market auditing." },
-  { code: "ENGL", name: "Dept of English Lit", description: "Classical poetry, modern drama, linguistics, and literary criticism." },
 ];
 
 const SUBJECTS_POOL = [
@@ -58,21 +57,15 @@ const COURSES_POOL = [
   { deptCode: "COMP", code: "BCA", name: "Bachelor of Computer Applications", type: "UG Vocational", duration: 3, description: "Three-year applied training framework mapping software, MERN, and networks." },
   { deptCode: "COMP", code: "MCA", name: "Master of Computer Applications", type: "PG Regular", duration: 2, description: "Two-year postgraduate tier evaluating advanced microservices and computing." },
   { deptCode: "COMM", code: "BCOM-H", name: "B.Com (Honors) Accounting", type: "UG Regular", duration: 4, description: "Comprehensive management track focusing on calculations and audits." },
-  { deptCode: "ENGL", code: "BA-ENGL", name: "BA (Honors) English Literature", type: "UG Regular", duration: 4, description: "Evaluates historical global creative movements and literature." },
 ];
 
 const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
 async function main() {
-  console.log("🧹 Running script-level database cleanup safely...");
+  const suffix = faker.string.alphanumeric(2).toUpperCase();
+  console.log(`🧹 Running script-level database seeding (Suffix: ${suffix})...`);
 
   try {
-    // Clean out all the old table items cascading backwards to clear structural constraints
-    await db.execute(sql`
-      TRUNCATE TABLE "fee", "semester_subject", "semester", "batch", "course_session", "course", "subject", "department", "academic_session" RESTART IDENTITY CASCADE;
-    `);
-    console.log("✨ Tables cleared locally via current Bun environment.");
-
     // 2. Seed Academic Sessions (Format: "2024-2028")
     console.log("🌱 Seeding Academic Sessions...");
     const sessionData = [
@@ -82,7 +75,7 @@ async function main() {
     ].map(({ startYear, duration }) => {
       const endYear = startYear + duration;
       return {
-        name: `${startYear}-${endYear}`, // Fits perfectly under the varchar(30) limit
+        name: `${startYear}-${endYear}-${suffix}`, // Fits under the varchar(30) limit
         startDate: `${startYear}-07-01`,
         endDate: `${endYear}-06-30`,
       };
@@ -97,7 +90,7 @@ async function main() {
     console.log("🌱 Seeding Departments...");
     const insertedDepts = await db
       .insert(departmentTable)
-      .values(DEPARTMENTS)
+      .values(DEPARTMENTS.map(d => ({ ...d, code: `${d.code}-${suffix}`.slice(0, 10), name: `${d.name} ${suffix}`.slice(0, 30) })))
       .returning({ id: departmentTable.id, code: departmentTable.code });
 
     // 4. Seed Subjects
@@ -106,8 +99,8 @@ async function main() {
       .insert(subjectTable)
       .values(
         SUBJECTS_POOL.map((sub) => ({
-          code: sub.code,
-          name: sub.name,
+          code: `${sub.code}${suffix}`.slice(0, 10),
+          name: `${sub.name} ${suffix}`.slice(0, 100),
           description: `Syllabus coursework for ${sub.name}.`,
           type: sub.type,
           hasPractical: sub.hasPractical,
@@ -119,14 +112,15 @@ async function main() {
     // 5. Seed Courses (Linking via numeric departmentId)
     console.log("🌱 Seeding Higher Education Courses...");
     const courseInsertValues = COURSES_POOL.map((c) => {
-      const dept = insertedDepts.find((d) => d.code === c.deptCode);
-      if (!dept) throw new Error(`Department with code ${c.deptCode} not found during seeding runtime.`);
+      const targetDeptCode = `${c.deptCode}-${suffix}`.slice(0, 10);
+      const dept = insertedDepts.find((d) => d.code === targetDeptCode);
+      if (!dept) throw new Error(`Department with code ${targetDeptCode} not found during seeding runtime.`);
       return {
-        name: c.name,
-        code: c.code,
+        name: `${c.name} ${suffix}`.slice(0, 50),
+        code: `${c.code}-${suffix}`.slice(0, 10),
         type: c.type,
         description: c.description,
-        departmentId: dept.id, // Numeric references injection
+        departmentId: dept.id, // String references injection
         duration: c.duration,
       };
     });
@@ -200,7 +194,7 @@ async function main() {
         });
 
         // --- Realistic Subject Assignment Business Logic ---
-        const targetedSubjectIds: number[] = [];
+        const targetedSubjectIds: string[] = [];
         const coursePrefix = parentCourse.code.includes("-") ? parentCourse.code.split("-")[1] : parentCourse.code;
         const prefixMatch = coursePrefix.slice(0, 3); // e.g., "PHY", "BCA", "CHE"
 

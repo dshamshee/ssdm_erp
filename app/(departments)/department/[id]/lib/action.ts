@@ -6,7 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // All courses by Department ID
-export async function fetchCoursesByDepartment(departmentId: number) {
+export async function fetchCoursesByDepartment(departmentId: string) {
     try {
 
         const session = await auth.api.getSession({ headers: await headers() });

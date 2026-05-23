@@ -5,7 +5,6 @@ import { signIn } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SigninSchema, signinSchema } from "../lib/zod-type/signin-type";
 import { InputForSingin } from "./Input-for-signin";
-import { AuthSubmitButton } from "../../_components/auth-submit-button";
 import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

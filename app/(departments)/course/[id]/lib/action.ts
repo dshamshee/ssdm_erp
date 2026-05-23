@@ -6,7 +6,7 @@ import { courseTable } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-export async function fetchCourseById(courseId: number) {
+export async function fetchCourseById(courseId: string) {
 
     try {
 
