@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { userRoleValues } from "@/lib/auth-role";
 
 export const signupSchema = z
   .object({
