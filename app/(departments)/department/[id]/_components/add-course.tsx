@@ -13,47 +13,50 @@ import {
 } from "@/components/ui/dialog"
 
 import { useForm } from "react-hook-form"
-import { type NewDepartmentType, newDepartmentSchema } from "../lib/zod-type/new-department-type"
+import { type NewCourseType, newCourseSchema } from "../lib/zod-type/new-course-type"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { InputForDepartment } from "./input-for-department"
+import { InputForCourse } from "./input-for-course"
 
-export function AddDepartment() {
+export function AddCourse() {
 
-    const form = useForm<NewDepartmentType>({
-        resolver: zodResolver(newDepartmentSchema),
+    const form = useForm<NewCourseType>({
+        resolver: zodResolver(newCourseSchema),
         defaultValues: {
             name: "",
             code: "",
-            description: ""
+            description: "",
+            type: "UG Regular",
+            duration: 4,
+            // isActive: true
         }
     })
 
-    const onSubmit = (data: NewDepartmentType)=>{
+    const onSubmit = (data: NewCourseType)=>{
         console.log(data)
     }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={"secondary"} className="text-blue-900 font-bold cursor-pointer shadow-lg">New Department</Button>
+        <Button variant={"secondary"} className="text-blue-900 font-bold cursor-pointer shadow-lg">New Course</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle className="font-semibold">Add New Department</DialogTitle>
+            <DialogTitle className="font-semibold">Add New Course</DialogTitle>
             <DialogDescription>
-              Add a new department here. Click save when you&apos;re
+              Add a new course here. Click save when you&apos;re
               done.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center gap-5">
-            <InputForDepartment form={form}/>
+            <InputForCourse form={form}/>
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-5">
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" className="cursor-pointer">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" className="cursor-pointer ">Submit</Button>
           </DialogFooter>
         </form>
       </DialogContent>
