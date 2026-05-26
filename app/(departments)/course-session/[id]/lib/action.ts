@@ -30,8 +30,7 @@ export async function fetchSemestersByCourseSession(courseSessionId: string) {
     } catch (error) {
         return {
             success: false,
-            message: "Error fetching semesters",
-            error: error,
+            message: error instanceof Error ? error.message : "Error fetching semesters",
         }
     }
 }

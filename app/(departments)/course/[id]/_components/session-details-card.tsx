@@ -1,17 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { academicSessionRelations, academicSessionTable } from "@/lib/db/schema/department";
+import { academicSessionTable } from "@/lib/db/schema/department";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-export const SessionDetailsCard = ({ session }: { session: typeof academicSessionTable.$inferSelect }) => {
+export const SessionDetailsCard = ({ courseSessionId, session }: { courseSessionId: string; session: typeof academicSessionTable.$inferSelect }) => {
 
     return (
-       <>
+        <>
             <Card className="hover:shadow-lg transition-shadow duration-200 ease-in-out">
                 <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle>{session.name}</CardTitle>
-                    <Link href={`/course-session/${session.id}`} className="flex justify-center items-center cursor-pointer">
+                    <Link href={`/course-session/${courseSessionId}`} className="flex justify-center items-center cursor-pointer">
                         {/* <Badge variant="link">{course.code}</Badge> */}
                         <ChevronRight className="h-6 w-6 text-cyan-700" />
                     </Link>
