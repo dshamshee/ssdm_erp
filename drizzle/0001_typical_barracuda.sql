@@ -1,0 +1,1 @@
+ALTER TABLE "academic_session" ADD COLUMN "isActive" boolean DEFAULT true NOT NULL;
