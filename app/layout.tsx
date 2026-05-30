@@ -1,17 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { QueryProviders } from "@/components/query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryProviders } from "@/components/query-provider"
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: [
+    "latin",
+  ],
+  variable: "--font-sans",
+  weight: "500",
 });
 
-const geistMono = Geist_Mono({
+const _geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: [
+    "latin",
+  ],
+});
+
+const _geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: [
+    "latin",
+  ],
 });
 
 export const metadata: Metadata = {
@@ -28,14 +41,19 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full",
+        "antialiased",
+        // geistSans.variable,
+        // geistMono.variable,
+        "font-sans",
+        inter.variable,
+      )}
     >
       <body className="min-h-full flex flex-col">
         <TooltipProvider>
           <QueryProviders>
-            <main>
-              {children}
-            </main>
+            <main>{children}</main>
           </QueryProviders>
         </TooltipProvider>
       </body>

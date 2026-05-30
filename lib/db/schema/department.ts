@@ -6,6 +6,7 @@ import {
   date,
   integer,
   pgTable,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -56,43 +57,34 @@ export const departmentTable = pgTable("department", {
 });
 
 // Independent master table
-export const subjectTable = pgTable(
-  "subject",
-  {
-    id: varchar({
-      length: 128,
-    })
-      .primaryKey()
-      .$defaultFn(() => createId()),
-    code: varchar({
-      length: 10,
-    })
-      .notNull()
-      .unique(),
-    name: varchar({
-      length: 100,
-    }).notNull(),
-    description: varchar({
-      length: 255,
-    }).notNull(),
-    type: varchar({
-      length: 30,
-    })
-      .notNull()
-      .default("MJC"),
-    isActive: boolean().default(true),
-    hasPractical: boolean().notNull().default(false),
-    practicalFee: integer().notNull().default(0),
-    createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp().defaultNow().notNull(),
-  },
-  (table) => [
-    check(
-      "type_check",
-      sql`${table.type} IN ('MJC', 'MIC', 'MDC', 'SEC', 'VAC')`,
-    ),
-  ],
-);
+export const subjectTable = pgTable("subject", {
+  id: varchar({
+    length: 128,
+  })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  code: varchar({
+    length: 10,
+  })
+    .notNull()
+    .unique(),
+  name: varchar({
+    length: 100,
+  }).notNull(),
+  type: text("type", {
+    enum: [
+      "MJC",
+      "MIC",
+      "MDC",
+      "SEC",
+      "VAC",
+    ],
+  }),
+  isActive: boolean().default(true),
+  hasPractical: boolean().notNull().default(false),
+  createdAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp().defaultNow().notNull(),
+});
 
 //  Depends on Department
 export const courseTable = pgTable(
