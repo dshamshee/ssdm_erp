@@ -1,25 +1,43 @@
-import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronRight } from "lucide-react"
-import Link from "next/link"
+"use client";
 
-export const DetailsCard = ({ id, code, name, description }: { id: string, code: string, name: string, description: string }) => {
+import { useState } from "react";
+import { Card, CardHeader } from "@/components/ui/card";
+import { DepartmentCoursesSheet } from "./department-courses-sheet";
 
-    return (
-        <Card className="w-full max-w-sm">
-            <CardHeader>
-                <CardTitle className="text-xl font-bold overflow-hidden text-ellipsis whitespace-nowrap"> 
-                    {name}
-                </CardTitle>
-                <CardDescription className="line-clamp-2 text-muted-foreground">
-                    {description}
-                </CardDescription>
-                <CardAction >
-                    <Link href={`department/${id}`} className="flex items-center justify-center gap-2 cursor-pointer font-semibold">
-                        {code}
-                        <ChevronRight /> 
-                    </Link>
-                </CardAction>
-            </CardHeader>
-        </Card>
-    )
-}
+export const DetailsCard = ({ id, name }: { id: string; name: string }) => {
+  const [open, setOpen] = useState(false);
+  const subject = name.trim();
+
+  return (
+    <>
+      <Card
+        size="sm"
+        className="w-full cursor-pointer transition-colors hover:bg-muted/60"
+        onClick={() => setOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setOpen(true);
+        }}
+      >
+        <CardHeader>
+          <div className="flex flex-col gap-1">
+            <span className="text-[11px] font-medium text-muted-foreground">
+              Department of
+            </span>
+            <span className="text-base font-semibold tracking-wide uppercase text-foreground">
+              {subject}
+            </span>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <DepartmentCoursesSheet
+        open={open}
+        onOpenChange={setOpen}
+        departmentId={id}
+        departmentName={subject}
+      />
+    </>
+  );
+};

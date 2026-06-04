@@ -1,44 +1,179 @@
-'use server'
+"use server";
+
+import { and, desc, eq, or } from "drizzle-orm";
+import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { headers } from "next/headers";
+import { courseTable, departmentTable, subjectTable } from "@/lib/db/schema";
+import {
+  type AddDepartmentSchema,
+  addDepartmentSchema,
+} from "./zod-type/add-department-type";
 
+async function getAdminSession() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-// Fetch All Departments 
-export async function fetchDepartments() {
+  if (!session) {
+    return {
+      success: false as const,
+      message: "Unauthorized",
+    };
+  }
 
-    try {
+  if (session.user.role !== "admin" && session.user.role !== "superAdmin") {
+    return {
+      success: false as const,
+      message: "Forbidden",
+    };
+  }
 
-        const session = await auth.api.getSession({headers: await headers()});
-
-        if(!session){
-            return {success: false, message: "Unauthorized"}
-        }
-
-        if(session.user.role !== "admin"){
-            return {success: false, message: "You are not authorized to access this page"}
-        }
-
-        const departments = await db.query.departmentTable.findMany();
-
-        if (!departments) {
-            return { success: false, message: "No departments found" }
-        }
-
-        return {
-            success: true,
-            data: departments,
-        }
-
-
-    } catch (error) {
-        return {
-            success: false,
-            message: "Error fetching departments",
-            error: error,
-        }
-    }
+  return {
+    success: true as const,
+    data: session,
+  };
 }
 
+// Fetch All Departments
+export async function fetchDepartments() {
+  try {
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
 
+    const departments = await db.query.departmentTable.findMany({
+      orderBy: [
+        desc(departmentTable.updatedAt),
+        desc(departmentTable.createdAt),
+      ],
+    });
 
+    if (!departments) {
+      return {
+        success: false,
+        message: "No departments found",
+      };
+    }
+
+    return {
+      success: true,
+      data: departments,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Error fetching departments",
+    };
+  }
+}
+
+export async function addDepartment(input: AddDepartmentSchema) {
+  try {
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+    const parsedInput = addDepartmentSchema.safeParse(input);
+    if (!parsedInput.success) {
+      return {
+        success: false,
+        message: "Invalid department details",
+      };
+    }
+
+    const subject = await db.query.subjectTable.findFirst({
+      where: and(
+        eq(subjectTable.id, parsedInput.data.subjectId),
+        eq(subjectTable.type, "MJC"),
+      ),
+    });
+
+    if (!subject) {
+      return {
+        success: false,
+        message: "Subject not found",
+      };
+    }
+
+    const codeValue = parsedInput.data.code?.trim();
+    const normalizedCode =
+      codeValue && codeValue.length > 0 ? codeValue : subject.code;
+    const descriptionValue = parsedInput.data.description?.trim() ?? "";
+
+    const existingDepartment = await db.query.departmentTable.findFirst({
+      where: or(
+        eq(departmentTable.name, subject.name),
+        eq(departmentTable.code, normalizedCode),
+      ),
+    });
+
+    if (existingDepartment) {
+      if (existingDepartment.name === subject.name) {
+        return {
+          success: false,
+          message: "Department already exists for this subject",
+        };
+      }
+      if (existingDepartment.code === normalizedCode) {
+        return {
+          success: false,
+          message: "Department code already exists",
+        };
+      }
+    }
+
+    const [department] = await db
+      .insert(departmentTable)
+      .values({
+        name: subject.name,
+        code: normalizedCode,
+        description: descriptionValue,
+      })
+      .returning();
+
+    return {
+      success: true,
+      data: department,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to add department",
+    };
+  }
+}
+
+// Fetch Courses by Department ID
+export async function fetchCoursesByDepartment(departmentId: string) {
+  try {
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+    const courses = await db.query.courseTable.findMany({
+      where: eq(courseTable.departmentId, departmentId),
+      orderBy: [desc(courseTable.updatedAt), desc(courseTable.createdAt)],
+      with: {
+        batches: true,
+      },
+    });
+
+    return {
+      success: true as const,
+      data: courses,
+    };
+  } catch (error) {
+    return {
+      success: false as const,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Error fetching courses for department",
+    };
+  }
+}

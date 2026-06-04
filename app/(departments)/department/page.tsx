@@ -4,21 +4,30 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-import { ListDepartment } from "./_components/list-department";
+import { fetchDepartments } from "./lib/action";
+import { getCoursesByDepartment } from "./query/get-courses-by-department";
 import { getDepartment } from "./query/get-all-department";
-import { AddDepartment } from "./_components/add-department";
+import { DepartmentContent } from "./_components/department-content";
 
 export default async function DepartmentPage() {
   const queryClient = new QueryClient();
 
+  // Prefetch departments first
   await queryClient.prefetchQuery(getDepartment());
+
+  // Prefetch courses for each department so the sheet opens instantly
+  const departmentsResult = await fetchDepartments();
+  if (departmentsResult.success && departmentsResult.data) {
+    await Promise.all(
+      departmentsResult.data.map((dept) =>
+        queryClient.prefetchQuery(getCoursesByDepartment(dept.id)),
+      ),
+    );
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="w-screen py-2 ps-3 mb-5 bg-blue-400 flex justify-center">
-          <AddDepartment />
-      </div>
-        <ListDepartment />
+      <DepartmentContent />
     </HydrationBoundary>
   );
 }
