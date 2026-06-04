@@ -51,14 +51,13 @@ export async function getAcademicSessions() {
         desc(academicSessionTable.createdAt),
       ],
       with: {
-        courseSessions: {
+        batches: {
           with: {
             course: {
               with: {
                 department: true,
               },
             },
-            batches: true,
             semesters: true,
           },
         },

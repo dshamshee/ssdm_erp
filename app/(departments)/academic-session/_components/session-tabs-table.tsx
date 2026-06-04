@@ -15,8 +15,8 @@ import { AddSessionDialog } from "./add-session-dialog";
 import { type AcademicSessionRow, columns } from "./column";
 import { DataTable } from "./data-table";
 
-function CourseSessionDetails({ session }: { session: AcademicSessionRow }) {
-  if (!session.courseSessions.length) {
+function CourseBatchDetails({ session }: { session: AcademicSessionRow }) {
+  if (!session.batches.length) {
     return (
       <p className="py-2 text-sm text-muted-foreground">
         No courses are attached to this session.
@@ -31,27 +31,25 @@ function CourseSessionDetails({ session }: { session: AcademicSessionRow }) {
           <TableRow className="hover:bg-transparent">
             <TableHead>Course</TableHead>
             <TableHead>Department</TableHead>
-            <TableHead>Batches</TableHead>
             <TableHead>Semesters</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {session.courseSessions.map((courseSession) => (
-            <TableRow key={courseSession.id}>
+          {session.batches.map((batch) => (
+            <TableRow key={batch.id}>
               <TableCell className="font-medium">
-                {courseSession.course.name}
+                {batch.course.name}
               </TableCell>
-              <TableCell>{courseSession.course.department.name}</TableCell>
-              <TableCell>{courseSession.batches.length}</TableCell>
-              <TableCell>{courseSession.semesters.length}</TableCell>
+              <TableCell>{batch.course.department.name}</TableCell>
+              <TableCell>{batch.semesters.length}</TableCell>
               <TableCell>
                 <Badge
                   variant={
-                    courseSession.course.isActive ? "default" : "secondary"
+                    batch.course.isActive ? "default" : "secondary"
                   }
                 >
-                  {courseSession.course.isActive ? "Active" : "Inactive"}
+                  {batch.course.isActive ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
             </TableRow>
@@ -94,7 +92,7 @@ export function SessionTabsTable() {
           columns={columns}
           data={activeSessions}
           renderExpandedRow={(session) => (
-            <CourseSessionDetails session={session} />
+            <CourseBatchDetails session={session} />
           )}
         />
       </TabsContent>
@@ -103,7 +101,7 @@ export function SessionTabsTable() {
           columns={columns}
           data={depreciatedSessions}
           renderExpandedRow={(session) => (
-            <CourseSessionDetails session={session} />
+            <CourseBatchDetails session={session} />
           )}
         />
       </TabsContent>
