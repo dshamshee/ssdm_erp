@@ -21,7 +21,10 @@ export const EnrolledStudentTable = pgTable('enrolled_students', {
   name: varchar({ length: 150 }).notNull(),
   gender: varchar({ length: 15 }).notNull(),
   subMJC: varchar({length: 128}).references(()=> subjectTable.id, {onDelete: 'cascade'}).notNull(),
-  subMIC: varchar({length: 128}).references(()=> subjectTable.id, {onDelete: 'cascade'}),
+  subMIC: jsonb().$type<string[]>().default([]),
+  subMDC: jsonb().$type<string[]>().default([]),
+  subSEC: jsonb().$type<string[]>().default([]),
+  subVAC: jsonb().$type<string[]>().default([]),
   batchId: varchar({ length: 128 }).references(() => batchTable.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp().defaultNow().notNull(), 
   updatedAt: timestamp().defaultNow().notNull(),
@@ -41,7 +44,7 @@ export const AdmittedStudentTable = pgTable('admitted_students', {
   UAN: varchar({ length: 128 }).unique().notNull(),
   registrationNumber: varchar({ length: 128 }),
   universityRoll: varchar({ length: 128 }),
-  collegeRoll: varchar({ length: 128 }).unique().notNull(), // Ex. SSDC UG 202629 123 (College Name, Course Type, Session, Unique No.)
+  collegeRoll: varchar({ length: 128 }).unique().notNull(), // Ex. UG2026290001 (Course Type, Session, Unique No.)
   admissionNo: varchar({ length: 128 }).unique(),
   confidentialNo: varchar({ length: 128 }).unique(),
   meritType: text(),
@@ -178,9 +181,13 @@ export const StudentRemarkTable = pgTable('student_remark', {
 // ENROLLED STUDENT RELATIONS
 
 export const enrolledStudentRelations = relations(EnrolledStudentTable, ({ one }) => ({
-  courseSession: one(batchTable, {
+  batch: one(batchTable, {
     fields: [EnrolledStudentTable.batchId],
     references: [batchTable.id],
+  }),
+  subMJC: one(subjectTable, {
+    fields: [EnrolledStudentTable.subMJC],
+    references: [subjectTable.id],
   }),
 }));
 

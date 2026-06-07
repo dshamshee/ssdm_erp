@@ -11,7 +11,7 @@ export const InputForVerification = ({ form }: { form: UseFormReturn<VerifyStude
         name="uan"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel requiredLable>UAS</FieldLabel>
+            <FieldLabel requiredLable>UAN</FieldLabel>
             <FieldContent>
               <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter your UAN" />
               <FieldError errors={[fieldState.error]} />
@@ -23,12 +23,12 @@ export const InputForVerification = ({ form }: { form: UseFormReturn<VerifyStude
 
       <Controller
         control={form.control}
-        name="email"
+        name="subMJC"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel requiredLable>Email Address</FieldLabel>
+            <FieldLabel requiredLable>MJC Subject</FieldLabel>
             <FieldContent>
-              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter your email" />
+              <Input {...field} aria-invalid={fieldState.invalid} placeholder="Enter your MIC Subject" />
               <FieldError errors={[fieldState.error]} />
             </FieldContent>
           </Field>

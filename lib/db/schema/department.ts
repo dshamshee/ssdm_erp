@@ -263,7 +263,7 @@ export const courseSessionRelations = relations(
       references: [courseTable.id],
     }),
 
-    session: one(academicSessionTable, {
+    academicSession: one(academicSessionTable, {
       fields: [batchTable.academicSessionId],
       references: [academicSessionTable.id],
     }),

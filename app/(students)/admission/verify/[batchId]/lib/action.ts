@@ -5,13 +5,18 @@ import { EnrolledStudentTable } from "@/lib/db/schema"
 import { and, eq } from "drizzle-orm"
 
 
-export const fetchEnrolledStudent = async ({ UAN, batchId }: { UAN: string, batchId: string }) => {
+export const fetchEnrolledStudent = async ({ batchId, UAN, MJC }: { batchId: string, UAN: string, MJC: string }) => {
 
   try {
 
     const student = await db.query.EnrolledStudentTable.findFirst({
-      where: and(eq(EnrolledStudentTable.UAN, UAN), eq(EnrolledStudentTable.batchId, batchId))
+      where: and(
+        eq(EnrolledStudentTable.batchId, batchId),
+        eq(EnrolledStudentTable.UAN, UAN),
+        eq(EnrolledStudentTable.subMJC, MJC)
+      )
     })
+
 
     if (!student) {
       return {
@@ -22,7 +27,7 @@ export const fetchEnrolledStudent = async ({ UAN, batchId }: { UAN: string, batc
 
     return {
       success: true,
-      isExist: true,
+      verification: true,
     }
 
 

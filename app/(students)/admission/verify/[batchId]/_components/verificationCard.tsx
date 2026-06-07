@@ -17,25 +17,27 @@ export const VerificationCard = ({ batchId }: { batchId: string }) => {
     resolver: zodResolver(verifyStudentUANZodSchema),
     defaultValues: {
       uan: "",
-      email: "",
+      subMJC: "",
     }
   })
 
   const [uan, setUan] = useState("")
+  const [mjc, setMjc] = useState("")
   const { mutate, isPending, isSuccess, isError, error } = useMutation({
     ...verifyEnrolledStudentMutationOptions(batchId),
   });
 
   const onSubmit = (data: VerifyStudentUANType) => {
     setUan(data.uan);
-    mutate(data.uan);
+    setMjc(data.subMJC)
+    mutate({UAN: data.uan, MJC: data.subMJC});
   }
 
   useEffect(() => {
     if (isSuccess) {
-      router.push(`/admission/register?batch=${batchId}&uan=${uan}`);
+      router.push(`/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`);
     }
-  }, [isSuccess, router, batchId, uan]);
+  }, [isSuccess, router, batchId, uan, mjc]);
 
 
   return (
@@ -46,7 +48,9 @@ export const VerificationCard = ({ batchId }: { batchId: string }) => {
             <CardTitle className="text-center text-lg">Please Verify your identity to proceed with the admission process</CardTitle>
           </CardHeader>
 
+          <div className="flex  flex-col justify-center items-center gap-5 mt-5">
           <InputForVerification form={form} />
+          </div>
 
           {isSuccess && (
             <p className="text-sm text-green-600 mt-2">Student verified successfully!</p>

@@ -4,8 +4,6 @@ import { db } from "@/lib/db";
 import {
   courseTable,
   departmentTable,
-  semesterSubjectTable,
-  semesterTable,
   subjectTable,
 } from "@/lib/db/schema";
 import type { ReturnType } from "@/types/return";

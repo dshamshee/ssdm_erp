@@ -6,14 +6,7 @@ import {
   departmentTable,
   subjectTable,
 } from "@/lib/db/schema";
-import {
-  AdmittedStudentTable,
-  EnrolledStudentTable,
-  StudentDocumentsTable,
-  StudentFeePaymentTable,
-  StudentPreviousAcademicRecordTable,
-  StudentRemarkTable,
-} from "../schema/student";
+import { EnrolledStudentTable } from "../schema/student";
 
 // --- Helpers ---
 
@@ -38,20 +31,23 @@ function pickRandomN<T>(arr: T[], n: number): T[] {
 // --- Data Pools ---
 
 const GENDERS = ["Male", "Female", "Transgender"] as const;
-const RELIGIONS = ["Hindu", "Muslim", "Christian", "Sikh", "Buddhist", "Jain"];
-const CASTES = ["General", "OBC", "SC", "ST", "EWS"];
-const BOARDS = ["CBSE", "ICSE", "State Board", "NIOS"];
-const STATES = ["Bihar", "Jharkhand", "Uttar Pradesh", "West Bengal", "Delhi", "Maharashtra"];
-const MERIT_TYPES = ["1st", "2nd", "3rd", "Sports Merit", "Tribe Reserved", "Other"] as const;
-const REMARK_TYPES = ["Academic", "Attendance", "Discipline", "Other"] as const;
-const IMPORTANCE_LEVELS = ["Low", "Medium", "High", "Critical"] as const;
-const PAYMENT_MODES = ["UPI", "Cash", "NEFT", "RTGS", "DD"] as const;
-const PAYMENT_STATUSES = ["Pending", "Completed", "Failed"] as const;
 
-// --- Student Seed Functions ---
+/**
+ * Maps MJC subject code prefixes to department code prefixes.
+ * E.g., a student who picks "PHY-MJC1" as MJC belongs to the PHYS department.
+ */
+const MJC_PREFIX_TO_DEPT_PREFIX: Record<string, string> = {
+  "PHY": "PHYS",
+  "CHM": "CHEM",
+  "MAT": "MATH",
+  "BCA": "COMP",
+  "COM": "COMM",
+};
+
+// --- Student Seed Function ---
 
 export async function seedStudents() {
-  console.log("🧹 Running student seeding...");
+  console.log("🧹 Running student seeding (Enrolled Students Only)...");
 
   try {
     // 1. Fetch existing data (prerequisite: department seed must have run)
@@ -65,7 +61,41 @@ export async function seedStudents() {
       process.exit(1);
     }
 
-    const subjectIds = subjects.map((s) => s.id);
+    // Categorize subjects by their type prefix (MJC, MIC, MDC, SEC, VAC)
+    const mjcSubjects = subjects.filter((s) => s.code.includes("MJC"));
+    const micSubjects = subjects.filter((s) => s.code.includes("MIC"));
+    const mdcSubjects = subjects.filter((s) => s.code.includes("MDC"));
+    const secSubjects = subjects.filter((s) => s.code.includes("SEC"));
+    const vacSubjects = subjects.filter((s) => s.code.includes("VAC"));
+
+    if (mjcSubjects.length === 0) {
+      console.error("❌ No MJC subjects found. Cannot seed students without MJC subjects.");
+      process.exit(1);
+    }
+
+    /**
+     * Given an MJC subject, find a matching batch:
+     * MJC subject code prefix (e.g. "PHY") → department prefix (e.g. "PHYS")
+     * → department → course in that department → batch for that course
+     */
+    function findBatchForMJC(mjcSubject: { id: string; code: string }) {
+      const subjectPrefix = mjcSubject.code.split("-")[0];
+      const deptPrefix = MJC_PREFIX_TO_DEPT_PREFIX[subjectPrefix];
+      if (!deptPrefix) return null;
+
+      const dept = departments.find((d) => d.code.startsWith(deptPrefix));
+      if (!dept) return null;
+
+      const deptCourses = courses.filter((c) => c.departmentId === dept.id);
+      if (deptCourses.length === 0) return null;
+
+      const course = pickRandom(deptCourses);
+
+      const courseBatches = batches.filter((b) => b.courseId === course.id);
+      if (courseBatches.length === 0) return null;
+
+      return { batch: pickRandom(courseBatches), course, dept };
+    }
 
     // 2. Seed Enrolled Students (pre-admission pipeline)
     console.log("🌱 Seeding Enrolled Students...");
@@ -73,194 +103,54 @@ export async function seedStudents() {
     const enrolledValues = [];
 
     for (let i = 0; i < ENROLLED_COUNT; i++) {
-      const course = pickRandom(courses);
-      const batch = batches.find((b) => b.courseId === course.id);
-      if (!batch) continue;
+      const mjcSubject = pickRandom(mjcSubjects);
+      const match = findBatchForMJC(mjcSubject);
+      if (!match) continue;
+
+      // MIC subjects should preferably be from a different department than MJC
+      const otherMicSubjects = micSubjects.filter(
+        (s) => !s.code.startsWith(mjcSubject.code.split("-")[0])
+      );
+
+      // Pick random subjects for all categories
+      const selectedMic = otherMicSubjects.length > 0 
+        ? [pickRandom(otherMicSubjects).id] 
+        : [];
+      
+      const selectedMdc = mdcSubjects.length > 0 
+        ? [pickRandom(mdcSubjects).id] 
+        : [];
+      
+      const selectedSec = secSubjects.length > 0 
+        ? [pickRandom(secSubjects).id] 
+        : [];
+      
+      const selectedVac = vacSubjects.length > 0 
+        ? [pickRandom(vacSubjects).id] 
+        : [];
 
       enrolledValues.push({
         UAN: generateUAN(i),
         name: faker.person.fullName(),
         gender: pickRandom([...GENDERS]),
-        subMJC: pickRandom(subjectIds),
-        subMIC: faker.datatype.boolean({ probability: 0.6 }) ? pickRandom(subjectIds) : null,
-        batchId: batch.id,
+        subMJC: mjcSubject.id,
+        subMIC: selectedMic,
+        subMDC: selectedMdc,
+        subSEC: selectedSec,
+        subVAC: selectedVac,
+        batchId: match.batch.id,
       });
     }
+
+    // Clear previous enrolled students to avoid UAN collisions
+    await db.delete(EnrolledStudentTable);
 
     const insertedEnrolled = await db
       .insert(EnrolledStudentTable)
       .values(enrolledValues)
       .returning({ id: EnrolledStudentTable.id, UAN: EnrolledStudentTable.UAN });
 
-    console.log(`   ✅ Enrolled ${insertedEnrolled.length} students.`);
-
-    // 3. Seed Admitted Students (full profile students)
-    console.log("🌱 Seeding Admitted Students...");
-    const ADMITTED_COUNT = 20;
-    const admittedValues = [];
-
-    for (let i = 0; i < ADMITTED_COUNT; i++) {
-      const course = pickRandom(courses);
-      const dept = departments.find((d) => d.id === course.departmentId);
-      const batch = batches.find((b) => b.courseId === course.id);
-      if (!dept || !batch) continue;
-
-      const gender = pickRandom([...GENDERS]);
-      const uan = generateUAN(ENROLLED_COUNT + i); // Offset to avoid UAN collision
-
-      admittedValues.push({
-        UAN: uan,
-        registrationNumber: `REG-${faker.string.alphanumeric(8).toUpperCase()}`,
-        universityRoll: `UNIV-${faker.string.numeric(8)}`,
-        collegeRoll: `SSDC-${course.code}-${faker.string.numeric(4)}`.slice(0, 128),
-        admissionNo: `ADM-${faker.string.alphanumeric(8).toUpperCase()}`,
-        confidentialNo: `CONF-${faker.string.numeric(8)}`,
-        meritType: pickRandom([...MERIT_TYPES]),
-        profileNo: `PROF-${faker.string.alphanumeric(8).toUpperCase()}`,
-        name: faker.person.fullName({ sex: gender === "Male" ? "male" : "female" }),
-        avatar: "",
-        DOB: faker.date.birthdate({ min: 18, max: 25, mode: "age" }).toISOString().split("T")[0],
-        AadharNumber: faker.string.numeric(12),
-        gender: gender,
-        fathersName: faker.person.fullName({ sex: "male" }),
-        mothersName: faker.person.fullName({ sex: "female" }),
-        religion: pickRandom(RELIGIONS),
-        caste: pickRandom(CASTES),
-        isMinority: faker.datatype.boolean({ probability: 0.2 }),
-        batchId: batch.id,
-        currentSemesterCount: 1,
-        subMJC: pickRandom(subjectIds),
-        subMIC: pickRandomN(subjectIds, faker.number.int({ min: 0, max: 3 })),
-        subMDC: pickRandomN(subjectIds, faker.number.int({ min: 0, max: 2 })),
-        subSEC: pickRandomN(subjectIds, faker.number.int({ min: 0, max: 2 })),
-        subVAC: pickRandomN(subjectIds, faker.number.int({ min: 0, max: 2 })),
-        isProfileCompleted: faker.datatype.boolean({ probability: 0.7 }),
-        isDetained: false,
-        isActive: true,
-        detainRemark: "",
-      });
-    }
-
-    const insertedAdmitted = await db
-      .insert(AdmittedStudentTable)
-      .values(admittedValues)
-      .returning({ id: AdmittedStudentTable.id, UAN: AdmittedStudentTable.UAN });
-
-    console.log(`   ✅ Admitted ${insertedAdmitted.length} students.`);
-
-    // 4. Seed Previous Academic Records for each admitted student
-    console.log("🌱 Seeding Student Previous Academic Records...");
-    const academicRecords = insertedAdmitted.map((student) => {
-      const hssObtained = faker.number.int({ min: 200, max: 500 });
-      const hssTotal = 500;
-
-      return {
-        studentId: student.id,
-
-        // Higher Secondary School Records
-        schoolName: `${faker.location.city()} Senior Secondary School`,
-        board: pickRandom(BOARDS),
-        obtainedMarks: hssObtained,
-        totalMarks: hssTotal,
-        percentage: Math.round((hssObtained / hssTotal) * 100),
-        rollNo: faker.string.numeric(10),
-        rollCode: faker.string.alphanumeric(6).toUpperCase(),
-        address: faker.location.streetAddress(),
-        city: faker.location.city(),
-        district: faker.location.city(),
-        state: pickRandom(STATES),
-        pinCode: faker.string.numeric(6),
-
-        // UG Records (optional — only for ~30% of students, simulating PG applicants)
-        ...(faker.datatype.boolean({ probability: 0.3 })
-          ? {
-              ugInstituteName: `${faker.location.city()} University`,
-              ugUniversityName: `University of ${faker.location.state()}`,
-              ugObtainedMarks: faker.number.int({ min: 300, max: 600 }),
-              ugTotalMarks: 600,
-              ugPercentage: faker.number.int({ min: 50, max: 90 }),
-              ugRollNo: faker.string.numeric(10),
-              ugAddress: faker.location.streetAddress(),
-              ugCity: faker.location.city(),
-              ugDistrict: faker.location.city(),
-              ugState: pickRandom(STATES),
-              ugPinCode: faker.string.numeric(6),
-            }
-          : {}),
-      };
-    });
-
-    await db.insert(StudentPreviousAcademicRecordTable).values(academicRecords);
-    console.log(`   ✅ Seeded ${academicRecords.length} previous academic records.`);
-
-    // 5. Seed Student Documents (placeholder entries, no real file URLs)
-    console.log("🌱 Seeding Student Documents...");
-    const documents = insertedAdmitted.map((student) => ({
-      studentId: student.id,
-      Aadhar: "",
-      cast: "",
-      domicile: "",
-      income: "",
-      pwd: "",
-      previousLC: "",
-      previousMigration: "",
-      previousMarksheet: "",
-      photo: "",
-      signature: "",
-      currentCourseMarkSheets: [] as string[],
-    }));
-
-    await db.insert(StudentDocumentsTable).values(documents);
-    console.log(`   ✅ Seeded ${documents.length} student document records.`);
-
-    // 6. Seed Student Fee Payments (1-3 payments per student)
-    console.log("🌱 Seeding Student Fee Payments...");
-    const feePayments = [];
-
-    for (const student of insertedAdmitted) {
-      const paymentCount = faker.number.int({ min: 1, max: 3 });
-
-      for (let p = 0; p < paymentCount; p++) {
-        feePayments.push({
-          studentId: student.id,
-          semesterCount: p + 1,
-          amount: faker.number.int({ min: 5000, max: 30000 }),
-          paymentMode: pickRandom([...PAYMENT_MODES]),
-          transactionId: `TXN-${faker.string.alphanumeric(12).toUpperCase()}`,
-          status: pickRandom([...PAYMENT_STATUSES]),
-        });
-      }
-    }
-
-    if (feePayments.length > 0) {
-      await db.insert(StudentFeePaymentTable).values(feePayments);
-    }
-    console.log(`   ✅ Seeded ${feePayments.length} fee payment records.`);
-
-    // 7. Seed Student Remarks (random remarks for ~50% of students)
-    console.log("🌱 Seeding Student Remarks...");
-    const remarks = [];
-
-    for (const student of insertedAdmitted) {
-      if (!faker.datatype.boolean({ probability: 0.5 })) continue;
-
-      const remarkCount = faker.number.int({ min: 1, max: 3 });
-      for (let r = 0; r < remarkCount; r++) {
-        remarks.push({
-          studentId: student.id,
-          remarkBy: `ADMIN-${faker.string.alphanumeric(6).toUpperCase()}`,
-          remarkType: pickRandom([...REMARK_TYPES]),
-          remark: faker.lorem.sentence({ min: 5, max: 15 }),
-          importance: pickRandom([...IMPORTANCE_LEVELS]),
-        });
-      }
-    }
-
-    if (remarks.length > 0) {
-      await db.insert(StudentRemarkTable).values(remarks);
-    }
-    console.log(`   ✅ Seeded ${remarks.length} student remarks.`);
-
+    console.log(`   ✅ Enrolled ${insertedEnrolled.length} students seeded successfully.`);
     console.log("🎉 Student seeding completed successfully!");
   } catch (error) {
     console.error("❌ Student seeding failed:", error);
