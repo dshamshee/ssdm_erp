@@ -3,24 +3,27 @@ import * as z from 'zod'
 export const studentDataZodSchema = z.object({
   // --- Identity (from enrollment, typically read-only) ---
   UAN: z.string().min(3, "UAN should be at least 3 characters long"),
-  // registrationNumber: z.string().optional(),
-  // universityRoll: z.string().optional(),
-  // collegeRoll: z.string().min(1, "College Roll is required"),
-  admissionNo: z.string().optional(),
-  confidentialNo: z.string().optional(),
-  meritType: z.enum(["1st", "2nd", "3rd", "Sports Merit", "Tribe Reserved", "Other", ""]).optional(),
-  profileNo: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  universityRoll: z.string().optional(),
+  admissionNumber: z.string().optional(),
+  confidentialNumber: z.string().optional(),
+  profileNumber: z.string().optional(),
+  admissionType: z.enum(["MERIT", "SPORT", "MANAGEMENT QUOTA", "OTHER", ""]).optional(),
+  ABCID: z.string().optional(),
 
   // --- Personal Details ---
   name: z.string().min(3, "Name should be at least 3 characters long"),
   avatar: z.any().optional(),
   DOB: z.string().min(1, "Date of Birth is required"),
   AadharNumber: z.string().length(12, "Aadhar Number must be exactly 12 digits"),
+  phone: z.string().length(10, "Phone number must be exactly 10 digits"),
+  email: z.string().email("Invalid email address"),
   gender: z.enum(["Male", "Female", "Transgender", ""], { message: "Gender is required" }),
   fathersName: z.string().min(1, "Father's Name is required"),
   mothersName: z.string().min(1, "Mother's Name is required"),
   religion: z.string().min(1, "Religion is required"),
   caste: z.string().min(1, "Caste is required"),
+  reservation: z.string().optional(),
   isMinority: z.boolean(),
 
   // --- Academic ---
@@ -29,6 +32,7 @@ export const studentDataZodSchema = z.object({
   subMJC: z.string().min(1, "Major Subject (MJC) is required"),
   subMIC: z.array(z.string()),
   subMDC: z.array(z.string()),
+  subAEC: z.array(z.string()),
   subSEC: z.array(z.string()),
   subVAC: z.array(z.string()),
 })

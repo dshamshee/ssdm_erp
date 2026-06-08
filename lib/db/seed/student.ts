@@ -61,10 +61,11 @@ export async function seedStudents() {
       process.exit(1);
     }
 
-    // Categorize subjects by their type prefix (MJC, MIC, MDC, SEC, VAC)
+    // Categorize subjects by their type prefix (MJC, MIC, MDC, AEC, SEC, VAC)
     const mjcSubjects = subjects.filter((s) => s.code.includes("MJC"));
     const micSubjects = subjects.filter((s) => s.code.includes("MIC"));
     const mdcSubjects = subjects.filter((s) => s.code.includes("MDC"));
+    const aecSubjects = subjects.filter((s) => s.code.includes("AEC"));
     const secSubjects = subjects.filter((s) => s.code.includes("SEC"));
     const vacSubjects = subjects.filter((s) => s.code.includes("VAC"));
 
@@ -120,6 +121,10 @@ export async function seedStudents() {
       const selectedMdc = mdcSubjects.length > 0 
         ? [pickRandom(mdcSubjects).id] 
         : [];
+
+      const selectedAec = aecSubjects.length > 0 
+        ? [pickRandom(aecSubjects).id] 
+        : [];
       
       const selectedSec = secSubjects.length > 0 
         ? [pickRandom(secSubjects).id] 
@@ -131,11 +136,23 @@ export async function seedStudents() {
 
       enrolledValues.push({
         UAN: generateUAN(i),
+        registrationNumber: `REG-${faker.string.numeric(10)}`,
+        aadharNumber: faker.string.numeric(12),
+        ABCID: `ABC-${faker.string.numeric(12)}`,
         name: faker.person.fullName(),
+        fathersName: faker.person.fullName(),
+        mothersName: faker.person.fullName(),
+        caste: pickRandom(['GEN', 'BC', 'EBC', 'SC', 'ST', 'OTHER']),
+        reservation: pickRandom(['NONE', 'DEFENCE', 'PHYSICALLY HANDICAPPED', 'SPORTS', null]),
+        phone: faker.string.numeric(10),
+        email: faker.internet.email().toLowerCase(),
         gender: pickRandom([...GENDERS]),
+        DOB: faker.date.birthdate({ min: 17, max: 25, mode: 'age' }).toISOString().split('T')[0],
+        admissionType: pickRandom(['MERIT', 'SPORT', 'MANAGEMENT QUOTA', 'OTHER']),
         subMJC: mjcSubject.id,
         subMIC: selectedMic,
         subMDC: selectedMdc,
+        subAEC: selectedAec,
         subSEC: selectedSec,
         subVAC: selectedVac,
         batchId: match.batch.id,

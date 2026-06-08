@@ -43,13 +43,14 @@ export const fetchEnrolledStudent = async ({ batch, UAN, MJC}: { batch: string, 
       }
     }
 
-    // Populate subMIC, subMDC, subSEC, subVAC from subjectTable
+    // Populate subMIC, subMDC, subAEC, subSEC, subVAC from subjectTable
     const subMICIds = (student.subMIC || []) as string[]
     const subMDCIds = (student.subMDC || []) as string[]
+    const subAECIds = (student.subAEC || []) as string[]
     const subSECIds = (student.subSEC || []) as string[]
     const subVACIds = (student.subVAC || []) as string[]
 
-    const allSubjectIds = Array.from(new Set([...subMICIds, ...subMDCIds, ...subSECIds, ...subVACIds])).filter(Boolean)
+    const allSubjectIds = Array.from(new Set([...subMICIds, ...subMDCIds, ...subAECIds, ...subSECIds, ...subVACIds])).filter(Boolean)
 
     let subjects: any[] = []
     if (allSubjectIds.length > 0) {
@@ -62,6 +63,7 @@ export const fetchEnrolledStudent = async ({ batch, UAN, MJC}: { batch: string, 
       ...student,
       subMIC: subMICIds.map((id) => subjectMap.get(id) || { id, name: id }).filter(Boolean),
       subMDC: subMDCIds.map((id) => subjectMap.get(id) || { id, name: id }).filter(Boolean),
+      subAEC: subAECIds.map((id) => subjectMap.get(id) || { id, name: id }).filter(Boolean),
       subSEC: subSECIds.map((id) => subjectMap.get(id) || { id, name: id }).filter(Boolean),
       subVAC: subVACIds.map((id) => subjectMap.get(id) || { id, name: id }).filter(Boolean),
     }

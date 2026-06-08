@@ -182,6 +182,7 @@ export const PreviousAcademicDetailsForm = ({ form }: { form: UseFormReturn<Acad
                         type="number" 
                         step="0.01" 
                         {...field} 
+                        value={field.value ?? ""}
                         aria-invalid={fieldState.invalid} 
                         readOnly 
                         className="bg-muted/30 pr-10"
@@ -399,6 +400,7 @@ export const PreviousAcademicDetailsForm = ({ form }: { form: UseFormReturn<Acad
                           type="number" 
                           step="0.01" 
                           {...field} 
+                          value={field.value ?? ""}
                           aria-invalid={fieldState.invalid} 
                           readOnly 
                           className="bg-muted/30 pr-10"

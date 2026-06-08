@@ -43,6 +43,8 @@ const SUBJECTS_POOL = [
   { code: "GEN-SEC2", name: "Digital Marketing Frameworks", category: "COMMERCE", hasPractical: false, fee: 0 },
   { code: "GEN-VAC1", name: "Environmental Studies & Eco-Systems", category: "SCIENCE", hasPractical: false, fee: 0 },
   { code: "GEN-VAC2", name: "Ethics, Culture & Human Values", category: "ARTS", hasPractical: false, fee: 0 },
+  { code: "GEN-AEC1", name: "Communicative English & Grammar", category: "ARTS", hasPractical: false, fee: 0 },
+  { code: "GEN-AEC2", name: "MIL Hindi & Modern Languages", category: "ARTS", hasPractical: false, fee: 0 },
 ];
 
 const COURSES_POOL = [
