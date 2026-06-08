@@ -82,8 +82,8 @@ const documentFileSchema = (requiredMsg?: string) => {
     schema = schema.refine((val) => val, requiredMsg)
   }
   return schema.refine(
-    (val) => !val || (val instanceof File && val.size <= MAX_FILE_SIZE),
-    "File size must be under 1MB"
+    (val) => !val || (val instanceof File && val.size <= MAX_FILE_SIZE) || (typeof val === "string" && val.startsWith("http")),
+    "File size must be under 1MB or must be an uploaded URL"
   )
 }
 

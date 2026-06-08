@@ -16,9 +16,64 @@ import {
 } from '../lib/zod-type/student-data'
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
+import axios from "axios"
 
 export const StudentRegistration = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isUploading, setIsUploading] = useState<boolean>(false)
+  const [isUploaded, setIsUploaded] = useState<boolean>(false)
+
+  const onUpload = async () => {
+    setIsUploading(true)
+    try {
+      // 1. Validate the documents form first to ensure correct selections/size checks pass
+      const isDocumentsValid = await documentsForm.trigger()
+      if (!isDocumentsValid) {
+        alert("Please correct the validation errors in the documents section before uploading.")
+        return
+      }
+
+      // 2. Collect files and build FormData
+      const values = documentsForm.getValues()
+      const formData = new FormData()
+      let hasFiles = false
+
+      for (const [key, val] of Object.entries(values)) {
+        if (val && val instanceof File) {
+          formData.append(key, val)
+          hasFiles = true
+        }
+      }
+
+      if (!hasFiles) {
+        alert("No files selected for upload.")
+        return
+      }
+
+      // 3. Post to /api/upload via Axios
+      const response = await axios.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      if (response.data && response.data.success && response.data.urls) {
+        // 4. Map returned URLs back to form values
+        for (const [key, url] of Object.entries(response.data.urls)) {
+          documentsForm.setValue(key as any, url, { shouldValidate: true })
+        }
+        setIsUploaded(true)
+        alert("All documents uploaded and compressed successfully!")
+      } else {
+        alert(response.data?.message || "File upload failed.")
+      }
+    } catch (err: any) {
+      console.error("Upload error:", err)
+      alert(err.response?.data?.message || "An error occurred during file upload.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   // 1. Personal Details Form
   const personalForm = useForm<StudentDataType>({
@@ -173,16 +228,28 @@ export const StudentRegistration = () => {
         {/* Section 3: Documents Upload */}
         <DocumentsUploadForm form={documentsForm} />
 
-        <div className="flex justify-end pt-4 px-2">
-          <Button
-            type="button"
-            size="lg"
-            className="w-full md:w-auto px-8 font-semibold shadow-md bg-primary hover:bg-primary/90 transition-all cursor-pointer rounded-full"
-            disabled={isLoading}
-            onClick={onSubmit}
-          >
-            {isLoading ? "Validating..." : "Submit Registration"}
-          </Button>
+        <div className="flex justify-end pt-4 px-2 gap-4">
+          {!isUploaded ? (
+            <Button
+              type="button"
+              size="lg"
+              className="w-full md:w-auto px-8 font-semibold shadow-md bg-chart-4 hover:bg-chart-4/90 transition-all cursor-pointer rounded-full"
+              disabled={isUploading}
+              onClick={onUpload}
+            >
+              {isUploading ? "Uploading & Compressing..." : "Upload Documents"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              className="w-full md:w-auto px-8 font-semibold shadow-md bg-primary hover:bg-primary/90 transition-all cursor-pointer rounded-full"
+              disabled={isLoading}
+              onClick={onSubmit}
+            >
+              {isLoading ? "Validating..." : "Submit Registration"}
+            </Button>
+          )}
         </div>
       </div>
     </div>
