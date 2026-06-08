@@ -66,17 +66,30 @@ export const academicDetailsZodSchema = z.object({
 
 export type AcademicDetailsType = z.infer<typeof academicDetailsZodSchema>
 
+const MAX_FILE_SIZE = 1024 * 1024 // 1MB
+
+const documentFileSchema = (requiredMsg?: string) => {
+  let schema = z.any()
+  if (requiredMsg) {
+    schema = schema.refine((val) => val, requiredMsg)
+  }
+  return schema.refine(
+    (val) => !val || (val instanceof File && val.size <= MAX_FILE_SIZE),
+    "File size must be under 1MB"
+  )
+}
+
 export const documentsUploadZodSchema = z.object({
-  Aadhar: z.any().refine((val) => val, "Aadhar card document is required"),
-  cast: z.any().optional(),
-  domicile: z.any().optional(),
-  income: z.any().optional(),
-  pwd: z.any().optional(),
-  previousLC: z.any().refine((val) => val, "Leaving Certificate is required"),
-  previousMigration: z.any().refine((val) => val, "Migration Certificate is required"),
-  previousMarksheet: z.any().refine((val) => val, "Previous Marksheet is required"),
-  photo: z.any().refine((val) => val, "Passport size photo is required"),
-  signature: z.any().refine((val) => val, "Signature is required"),
+  Aadhar: documentFileSchema("Aadhar card document is required"),
+  cast: documentFileSchema().optional(),
+  domicile: documentFileSchema().optional(),
+  income: documentFileSchema().optional(),
+  pwd: documentFileSchema().optional(),
+  previousLC: documentFileSchema("Leaving Certificate is required"),
+  previousMigration: documentFileSchema("Migration Certificate is required"),
+  previousMarksheet: documentFileSchema("Previous Marksheet is required"),
+  photo: documentFileSchema("Passport size photo is required"),
+  signature: documentFileSchema("Signature is required"),
 })
 
 export type DocumentsUploadType = z.infer<typeof documentsUploadZodSchema>

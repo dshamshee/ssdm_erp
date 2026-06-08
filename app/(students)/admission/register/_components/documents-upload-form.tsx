@@ -75,7 +75,15 @@ export const DocumentsUploadForm = ({ form }: { form: UseFormReturn<DocumentsUpl
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   onChange={(e) => {
                     const file = e.target.files?.[0]
-                    handleFileChange(name, file, onChange)
+                    if (file && file.size > 1024 * 1024) {
+                      alert(`Warning: The file "${file.name}" exceeds the 1MB size limit. Please upload a file under 1MB.`);
+                      e.target.value = "" // Clear the HTML input
+                      form.setError(name, { type: "manual", message: "File size must be under 1MB" })
+                      handleFileChange(name, undefined, onChange)
+                    } else {
+                      form.clearErrors(name)
+                      handleFileChange(name, file, onChange)
+                    }
                   }}
                   {...fieldProps}
                 />
@@ -135,7 +143,7 @@ export const DocumentsUploadForm = ({ form }: { form: UseFormReturn<DocumentsUpl
             <DocumentInputCard 
               name="photo" 
               label="Passport Size Photograph" 
-              description="JPG, PNG up to 2MB"
+              description="JPG, PNG up to 1MB"
               required 
               accept=".jpg,.jpeg,.png"
               icon={ImageIcon}
@@ -151,25 +159,25 @@ export const DocumentsUploadForm = ({ form }: { form: UseFormReturn<DocumentsUpl
             <DocumentInputCard 
               name="Aadhar" 
               label="Aadhar Card" 
-              description="PDF, JPG, PNG up to 2MB"
+              description="PDF, JPG, PNG up to 1MB"
               required 
             />
             <DocumentInputCard 
               name="previousMarksheet" 
               label="Previous Year Marksheet" 
-              description="PDF, JPG, PNG up to 2MB"
+              description="PDF, JPG, PNG up to 1MB"
               required 
             />
             <DocumentInputCard 
               name="previousLC" 
               label="College Leaving Certificate (CLC)" 
-              description="PDF, JPG, PNG up to 2MB"
+              description="PDF, JPG, PNG up to 1MB"
               required 
             />
             <DocumentInputCard 
               name="previousMigration" 
               label="Migration Certificate" 
-              description="PDF, JPG, PNG up to 2MB"
+              description="PDF, JPG, PNG up to 1MB"
               required 
             />
           </div>
@@ -186,22 +194,22 @@ export const DocumentsUploadForm = ({ form }: { form: UseFormReturn<DocumentsUpl
             <DocumentInputCard 
               name="cast" 
               label="Caste Certificate" 
-              description="Required for OBC/SC/ST candidates" 
+              description="OBC/SC/ST candidates (up to 1MB)" 
             />
             <DocumentInputCard 
               name="domicile" 
               label="Domicile Certificate" 
-              description="PDF, JPG, PNG up to 2MB" 
+              description="PDF, JPG, PNG up to 1MB" 
             />
             <DocumentInputCard 
               name="income" 
               label="Income Certificate" 
-              description="PDF, JPG, PNG up to 2MB" 
+              description="PDF, JPG, PNG up to 1MB" 
             />
             <DocumentInputCard 
               name="pwd" 
               label="PWD Certificate" 
-              description="For Persons with Disabilities" 
+              description="Disability certificate (up to 1MB)" 
             />
           </div>
         </div>

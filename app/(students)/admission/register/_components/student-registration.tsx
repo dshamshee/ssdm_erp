@@ -15,7 +15,7 @@ import {
   DocumentsUploadType,
 } from '../lib/zod-type/student-data'
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export const StudentRegistration = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -95,6 +95,17 @@ export const StudentRegistration = () => {
       signature: undefined,
     }
   })
+
+  // Automatically sync documents photo field to personalForm's avatar field
+  const watchedPhoto = documentsForm.watch("photo")
+
+  useEffect(() => {
+    if (watchedPhoto) {
+      personalForm.setValue("avatar", watchedPhoto, { shouldValidate: true })
+    } else {
+      personalForm.setValue("avatar", undefined, { shouldValidate: true })
+    }
+  }, [watchedPhoto, personalForm])
 
   const onSubmit = async () => {
     setIsLoading(true)

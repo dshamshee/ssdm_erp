@@ -32,7 +32,20 @@ export const PersonalDetailsForm = ({ form }: { form: UseFormReturn<StudentDataT
     enabled: !!batch && !!UAN && !!MJC,
   });
 
-  const [avatarFileName, setAvatarFileName] = useState<string>("")
+  const avatarFile = form.watch("avatar")
+  const [avatarUrl, setAvatarUrl] = useState<string>("")
+
+  useEffect(() => {
+    if (avatarFile instanceof File) {
+      const url = URL.createObjectURL(avatarFile)
+      setAvatarUrl(url)
+      return () => URL.revokeObjectURL(url)
+    } else if (typeof avatarFile === "string" && avatarFile !== "") {
+      setAvatarUrl(avatarFile)
+    } else {
+      setAvatarUrl("")
+    }
+  }, [avatarFile])
 
   useEffect(() => {
     if (data) {
@@ -283,7 +296,20 @@ export const PersonalDetailsForm = ({ form }: { form: UseFormReturn<StudentDataT
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel requiredLable>Religion</FieldLabel>
                   <FieldContent>
-                    <Input {...field} aria-invalid={fieldState.invalid} placeholder="Ex: Hindu, Islam, Christian" />
+                    <select
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                    >
+                      <option value="">Select Religion</option>
+                      <option value="Hindu">Hindu</option>
+                      <option value="Islam">Islam</option>
+                      <option value="Christian">Christian</option>
+                      <option value="Sikh">Sikh</option>
+                      <option value="Buddhist">Buddhist</option>
+                      <option value="Jain">Jain</option>
+                      <option value="Other">Other</option>
+                    </select>
                     <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
@@ -298,7 +324,21 @@ export const PersonalDetailsForm = ({ form }: { form: UseFormReturn<StudentDataT
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel requiredLable>Caste</FieldLabel>
                   <FieldContent>
-                    <Input {...field} aria-invalid={fieldState.invalid} placeholder="Ex: General, OBC, SC, ST" />
+                    <select
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                    >
+                      <option value="">Select Caste</option>
+                      <option value="General">General</option>
+                      <option value="OBC">OBC</option>
+                      <option value="SC">SC</option>
+                      <option value="ST">ST</option>
+                      <option value="EWS">EWS</option>
+                      <option value="EBC">EBC</option>
+                      <option value="BC">BC</option>
+                      <option value="Other">Other</option>
+                    </select>
                     <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
@@ -376,48 +416,41 @@ export const PersonalDetailsForm = ({ form }: { form: UseFormReturn<StudentDataT
               )}
             />
 
-            {/* Avatar Photo Upload */}
-            <Controller
-              control={form.control}
-              name="avatar"
-              render={({ field: { value, onChange, ...fieldProps }, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Profile Photo (Avatar)</FieldLabel>
-                  <FieldContent>
-                    <div className="flex flex-col gap-2">
-                      <div className="relative flex items-center justify-center border border-dashed border-input rounded-2xl bg-muted/20 hover:bg-muted/40 transition-colors p-4 cursor-pointer min-h-[5rem]">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              onChange(file);
-                              setAvatarFileName(file.name);
-                              console.log("Avatar selected:", file);
-                            }
-                          }}
-                          {...fieldProps}
-                        />
-                        <div className="flex flex-col items-center gap-1.5 text-xs text-muted-foreground pointer-events-none">
-                          <Upload className="h-5 w-5 text-muted-foreground animate-bounce" />
-                          <span className="font-semibold text-primary">Choose avatar file</span>
-                          <span>PNG, JPG or WEBP up to 5MB</span>
-                        </div>
-                      </div>
-                      {avatarFileName && (
-                        <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 px-2 py-1 rounded-md w-fit">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span className="font-medium truncate max-w-[180px]">{avatarFileName}</span>
-                        </div>
-                      )}
-                    </div>
-                    <FieldError errors={[fieldState.error]} />
-                  </FieldContent>
-                </Field>
-              )}
-            />
+            {/* Profile Photo (Avatar) - Linked from Documents */}
+            <Field className="flex flex-col gap-2 p-4 bg-muted/20 border border-input/30 rounded-2xl">
+              <FieldLabel className="text-sm font-semibold">Profile Photo (Avatar)</FieldLabel>
+              <FieldContent className="flex flex-row items-center gap-4 pt-1.5">
+                <div className="relative h-16 w-16 rounded-full overflow-hidden border border-input bg-muted flex items-center justify-center shrink-0 shadow-inner">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Student Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {avatarFile ? (
+                    <>
+                      <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Linked from Documents
+                      </span>
+                      <span className="text-xs text-muted-foreground block truncate max-w-[180px]">
+                        {avatarFile.name || "photograph.png"}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs font-medium text-amber-600 block">
+                        Waiting for upload...
+                      </span>
+                      <span className="text-xs text-muted-foreground block leading-tight">
+                        Upload your Passport Size Photograph in the Documents section below to link it automatically.
+                      </span>
+                    </>
+                  )}
+                </div>
+              </FieldContent>
+            </Field>
 
             {/* Minority Status */}
             <Controller
