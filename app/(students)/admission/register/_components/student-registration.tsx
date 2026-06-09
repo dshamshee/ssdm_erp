@@ -1,6 +1,4 @@
 'use client'
-import { useQuery } from "@tanstack/react-query"
-import { getEnrolledStudent } from "../query/get-enrolled-student"
 import { PersonalDetailsForm } from "./personal-details-form"
 import { PreviousAcademicDetailsForm } from "./previous-academic-details-form"
 import { DocumentsUploadForm } from "./documents-upload-form"
@@ -17,11 +15,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import { useMutRegisterStudent } from "../query/mut-register-student"
+import { toast } from "sonner"
 
 export const StudentRegistration = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [isUploaded, setIsUploaded] = useState<boolean>(false)
+  const { mutate, isPending } = useMutRegisterStudent()
 
   const onUpload = async () => {
     setIsUploading(true)
@@ -174,37 +174,34 @@ export const StudentRegistration = () => {
   }, [watchedPhoto, personalForm])
 
   const onSubmit = async () => {
-    setIsLoading(true)
-    try {
-      // Trigger validation on all forms in parallel
-      const [isPersonalValid, isAcademicValid, isDocumentsValid] = await Promise.all([
-        personalForm.trigger(),
-        academicForm.trigger(),
-        documentsForm.trigger(),
-      ])
+    // Trigger validation on all forms in parallel
+    const [isPersonalValid, isAcademicValid, isDocumentsValid] = await Promise.all([
+      personalForm.trigger(),
+      academicForm.trigger(),
+      documentsForm.trigger(),
+    ])
 
-      if (isPersonalValid && isAcademicValid && isDocumentsValid) {
-        console.log("=== Consolidated Form Submission ===")
-        console.log("Personal Details:", personalForm.getValues())
-        console.log("Academic Details:", academicForm.getValues())
-        console.log("Uploaded Documents:", documentsForm.getValues())
-        alert("Form validated successfully! Check console for submission details.")
-      } else {
-        console.warn("Validation failed in one or more forms:", {
-          personalFormValid: isPersonalValid,
-          personalErrors: personalForm.formState.errors,
-          academicFormValid: isAcademicValid,
-          academicErrors: academicForm.formState.errors,
-          documentsFormValid: isDocumentsValid,
-          documentsErrors: documentsForm.formState.errors,
-        })
-        alert("Please correct the validation errors in the form before submitting.")
-      }
-    } catch (err) {
-      console.error("Submission error:", err)
-    } finally {
-      setIsLoading(false)
+    if (!isPersonalValid || !isAcademicValid || !isDocumentsValid) {
+      toast.error("Please correct the validation errors in the form before submitting.")
+      return
     }
+
+    // Build the combined payload and pass to the mutation
+    const personalValues = personalForm.getValues()
+    const academicValues = academicForm.getValues()
+    const documentValues = documentsForm.getValues()
+
+    // Documents should now be URL strings after Cloudinary upload
+    const documentsPayload: Record<string, string> = {}
+    for (const [key, val] of Object.entries(documentValues)) {
+      documentsPayload[key] = typeof val === "string" ? val : ""
+    }
+
+    mutate({
+      personal: personalValues,
+      academic: academicValues,
+      documents: documentsPayload as any,
+    })
   }
 
   return (
@@ -244,10 +241,10 @@ export const StudentRegistration = () => {
               type="button"
               size="lg"
               className="w-full md:w-auto px-8 font-semibold shadow-md bg-primary hover:bg-primary/90 transition-all cursor-pointer rounded-full"
-              disabled={isLoading}
+              disabled={isPending}
               onClick={onSubmit}
             >
-              {isLoading ? "Validating..." : "Submit Registration"}
+              {isPending ? "Submitting..." : "Submit Registration"}
             </Button>
           )}
         </div>
