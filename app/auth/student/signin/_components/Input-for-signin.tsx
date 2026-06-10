@@ -11,7 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 
-export function InputForSingin({ form }: { form: UseFormReturn<SigninSchema> }) {
+export function InputForSingin({
+  form,
+}: {
+  form: UseFormReturn<SigninSchema>;
+}) {
   return (
     <>
       <Controller

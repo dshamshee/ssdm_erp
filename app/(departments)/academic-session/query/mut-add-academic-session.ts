@@ -14,11 +14,7 @@ export function useAddAcademicSession() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "academic-sessions",
-        ],
-      });
+      queryClient.invalidateQueries({ queryKey: ["academic-sessions"] });
     },
   });
 }

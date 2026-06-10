@@ -1,5 +1,5 @@
-import * as z from "zod"
-import { studentDataZodSchema, academicDetailsZodSchema } from "./student-data"
+import * as z from "zod";
+import { studentDataZodSchema, academicDetailsZodSchema } from "./student-data";
 
 // Server-side documents schema: only accepts Cloudinary URL strings (files are already uploaded)
 const documentsUrlSchema = z.object({
@@ -13,12 +13,12 @@ const documentsUrlSchema = z.object({
   previousMarksheet: z.string().url("Previous Marksheet URL is required"),
   photo: z.string().url("Photo URL is required"),
   signature: z.string().url("Signature URL is required"),
-})
+});
 
 export const registerStudentSchema = z.object({
   personal: studentDataZodSchema,
   academic: academicDetailsZodSchema,
   documents: documentsUrlSchema,
-})
+});
 
-export type RegisterStudentPayload = z.infer<typeof registerStudentSchema>
+export type RegisterStudentPayload = z.infer<typeof registerStudentSchema>;

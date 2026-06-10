@@ -1,19 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!node_modules",
-      "!.next",
-      "!dist",
-      "!build"
-    ]
+    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
   },
   "formatter": {
     "enabled": true,
@@ -31,30 +21,12 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "style": {
-        "useBlockStatements": {
-          "level": "error",
-          "fix": "safe"
-        }
-      },
+      "style": { "useBlockStatements": { "level": "error", "fix": "safe" } },
       "recommended": true,
-      "correctness": {
-        "noUnusedVariables": "error"
-      },
-      "suspicious": {
-        "noUnknownAtRules": "off"
-      }
+      "correctness": { "noUnusedVariables": "error" },
+      "suspicious": { "noUnknownAtRules": "off" }
     },
-    "domains": {
-      "next": "recommended",
-      "react": "recommended"
-    }
+    "domains": { "next": "recommended", "react": "recommended" }
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  }
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
 }

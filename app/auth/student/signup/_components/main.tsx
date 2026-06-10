@@ -18,12 +18,7 @@ import { InputForSignup } from "./Input-for-signup";
 export function MainSignupForm() {
   const form = useForm<SignupSchema>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onSubmit = async (data: SignupSchema) => {

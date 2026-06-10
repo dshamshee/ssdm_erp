@@ -44,19 +44,10 @@ export function AddSessionDialog() {
   const defaultEndYear = getDefaultEndYear(currentYear);
   const form = useForm<AddAcademicSessionSchema>({
     resolver: zodResolver(addAcademicSessionSchema),
-    defaultValues: {
-      startYear: currentYear,
-      endYear: defaultEndYear,
-    },
+    defaultValues: { startYear: currentYear, endYear: defaultEndYear },
   });
-  const startYear = useWatch({
-    control: form.control,
-    name: "startYear",
-  });
-  const endYear = useWatch({
-    control: form.control,
-    name: "endYear",
-  });
+  const startYear = useWatch({ control: form.control, name: "startYear" });
+  const endYear = useWatch({ control: form.control, name: "endYear" });
   const startYearValue = startYear ?? currentYear;
   const endYearValue = endYear ?? defaultEndYear;
   const startYearOptions = getStartYearOptions(startYearValue);
@@ -72,10 +63,7 @@ export function AddSessionDialog() {
 
   async function onSubmit(values: AddAcademicSessionSchema) {
     await addSession.mutateAsync(values);
-    form.reset({
-      startYear: currentYear,
-      endYear: defaultEndYear,
-    });
+    form.reset({ startYear: currentYear, endYear: defaultEndYear });
     setOpen(false);
   }
 
@@ -123,11 +111,7 @@ export function AddSessionDialog() {
                         </NativeSelectOption>
                       ))}
                     </NativeSelect>
-                    <FieldError
-                      errors={[
-                        fieldState.error,
-                      ]}
-                    />
+                    <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
               )}
@@ -154,11 +138,7 @@ export function AddSessionDialog() {
                         </NativeSelectOption>
                       ))}
                     </NativeSelect>
-                    <FieldError
-                      errors={[
-                        fieldState.error,
-                      ]}
-                    />
+                    <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
               )}

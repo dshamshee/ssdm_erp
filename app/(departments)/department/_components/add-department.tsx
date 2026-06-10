@@ -2,9 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useGetSubjects } from "@/app/(departments)/subjects/query/get-subjects";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -13,10 +12,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
 import {
   Sheet,
   SheetClose,
@@ -36,32 +31,25 @@ import { useAddDepartment } from "../query/mut-add-department";
 export function AddDepartmentSheet() {
   const [open, setOpen] = useState(false);
   const addDepartment = useAddDepartment();
-  const { data: subjects = [], isPending, isError, error } = useGetSubjects();
-
-  const mjcSubjects = useMemo(
-    () => subjects.filter((subject) => subject.type === "MJC"),
-    [
-      subjects,
-    ],
-  );
 
   const form = useForm<AddDepartmentSchema>({
     resolver: zodResolver(addDepartmentSchema) as never,
-    defaultValues: {
-      subjectId: "",
-      code: "",
-      description: "",
-    },
+    defaultValues: { name: "", code: "", description: "" },
   });
 
   async function onSubmit(values: AddDepartmentSchema) {
-    await addDepartment.mutateAsync(values);
-    form.reset({
-      subjectId: "",
-      code: "",
-      description: "",
-    });
-    setOpen(false);
+    try {
+      await addDepartment.mutateAsync(values);
+      form.reset({ name: "", code: "", description: "" });
+      setOpen(false);
+    } catch (err: any) {
+      const errorMessage = err?.message || "";
+      if (errorMessage.toLowerCase().includes("code")) {
+        form.setError("code", { type: "manual", message: errorMessage });
+      } else if (errorMessage.toLowerCase().includes("name")) {
+        form.setError("name", { type: "manual", message: errorMessage });
+      }
+    }
   }
 
   return (
@@ -80,7 +68,7 @@ export function AddDepartmentSheet() {
           <SheetHeader>
             <SheetTitle>Add Department</SheetTitle>
             <SheetDescription>
-              Create a new department from an MJC subject.
+              Create a new department by entering its name.
             </SheetDescription>
           </SheetHeader>
 
@@ -88,41 +76,17 @@ export function AddDepartmentSheet() {
             <div className="grid gap-3">
               <Controller
                 control={form.control}
-                name="subjectId"
+                name="name"
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid || isError}>
-                    <FieldLabel required>Department of</FieldLabel>
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel required>Department Name</FieldLabel>
                     <FieldContent>
-                      <NativeSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                        aria-invalid={fieldState.invalid || isError}
-                        className="w-full"
-                        disabled={isPending || isError}
-                      >
-                        <NativeSelectOption value="">
-                          Select subject
-                        </NativeSelectOption>
-                        {mjcSubjects.map((subject) => (
-                          <NativeSelectOption
-                            key={subject.id}
-                            value={subject.id}
-                          >
-                            {subject.name}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                          isError
-                            ? {
-                                message:
-                                  error?.message || "Failed to load subjects",
-                              }
-                            : undefined,
-                        ]}
+                      <Input
+                        placeholder="e.g. Physics"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
                       />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}
@@ -140,11 +104,7 @@ export function AddDepartmentSheet() {
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                        ]}
-                      />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}
@@ -162,11 +122,7 @@ export function AddDepartmentSheet() {
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                        ]}
-                      />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}

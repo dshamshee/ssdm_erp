@@ -37,11 +37,11 @@ const GENDERS = ["Male", "Female", "Transgender"] as const;
  * E.g., a student who picks "PHY-MJC1" as MJC belongs to the PHYS department.
  */
 const MJC_PREFIX_TO_DEPT_PREFIX: Record<string, string> = {
-  "PHY": "PHYS",
-  "CHM": "CHEM",
-  "MAT": "MATH",
-  "BCA": "COMP",
-  "COM": "COMM",
+  PHY: "PHYS",
+  CHM: "CHEM",
+  MAT: "MATH",
+  BCA: "COMP",
+  COM: "COMM",
 };
 
 // --- Student Seed Function ---
@@ -51,13 +51,32 @@ export async function seedStudents() {
 
   try {
     // 1. Fetch existing data (prerequisite: department seed must have run)
-    const departments = await db.select({ id: departmentTable.id, code: departmentTable.code }).from(departmentTable);
-    const courses = await db.select({ id: courseTable.id, code: courseTable.code, departmentId: courseTable.departmentId }).from(courseTable);
-    const batches = await db.select({ id: batchTable.id, courseId: batchTable.courseId }).from(batchTable);
-    const subjects = await db.select({ id: subjectTable.id, code: subjectTable.code }).from(subjectTable);
+    const departments = await db
+      .select({ id: departmentTable.id, code: departmentTable.code })
+      .from(departmentTable);
+    const courses = await db
+      .select({
+        id: courseTable.id,
+        code: courseTable.code,
+        departmentId: courseTable.departmentId,
+      })
+      .from(courseTable);
+    const batches = await db
+      .select({ id: batchTable.id, courseId: batchTable.courseId })
+      .from(batchTable);
+    const subjects = await db
+      .select({ id: subjectTable.id, code: subjectTable.code })
+      .from(subjectTable);
 
-    if (departments.length === 0 || courses.length === 0 || batches.length === 0 || subjects.length === 0) {
-      console.error("❌ No department/course/batch/subject data found. Please run the department seed first.");
+    if (
+      departments.length === 0 ||
+      courses.length === 0 ||
+      batches.length === 0 ||
+      subjects.length === 0
+    ) {
+      console.error(
+        "❌ No department/course/batch/subject data found. Please run the department seed first.",
+      );
       process.exit(1);
     }
 
@@ -70,7 +89,9 @@ export async function seedStudents() {
     const vacSubjects = subjects.filter((s) => s.code.includes("VAC"));
 
     if (mjcSubjects.length === 0) {
-      console.error("❌ No MJC subjects found. Cannot seed students without MJC subjects.");
+      console.error(
+        "❌ No MJC subjects found. Cannot seed students without MJC subjects.",
+      );
       process.exit(1);
     }
 
@@ -110,29 +131,24 @@ export async function seedStudents() {
 
       // MIC subjects should preferably be from a different department than MJC
       const otherMicSubjects = micSubjects.filter(
-        (s) => !s.code.startsWith(mjcSubject.code.split("-")[0])
+        (s) => !s.code.startsWith(mjcSubject.code.split("-")[0]),
       );
 
       // Pick random subjects for all categories
-      const selectedMic = otherMicSubjects.length > 0 
-        ? [pickRandom(otherMicSubjects).id] 
-        : [];
-      
-      const selectedMdc = mdcSubjects.length > 0 
-        ? [pickRandom(mdcSubjects).id] 
-        : [];
+      const selectedMic =
+        otherMicSubjects.length > 0 ? [pickRandom(otherMicSubjects).id] : [];
 
-      const selectedAec = aecSubjects.length > 0 
-        ? [pickRandom(aecSubjects).id] 
-        : [];
-      
-      const selectedSec = secSubjects.length > 0 
-        ? [pickRandom(secSubjects).id] 
-        : [];
-      
-      const selectedVac = vacSubjects.length > 0 
-        ? [pickRandom(vacSubjects).id] 
-        : [];
+      const selectedMdc =
+        mdcSubjects.length > 0 ? [pickRandom(mdcSubjects).id] : [];
+
+      const selectedAec =
+        aecSubjects.length > 0 ? [pickRandom(aecSubjects).id] : [];
+
+      const selectedSec =
+        secSubjects.length > 0 ? [pickRandom(secSubjects).id] : [];
+
+      const selectedVac =
+        vacSubjects.length > 0 ? [pickRandom(vacSubjects).id] : [];
 
       enrolledValues.push({
         UAN: generateUAN(i),
@@ -142,13 +158,27 @@ export async function seedStudents() {
         name: faker.person.fullName(),
         fathersName: faker.person.fullName(),
         mothersName: faker.person.fullName(),
-        caste: pickRandom(['GEN', 'BC', 'EBC', 'SC', 'ST', 'OTHER']),
-        reservation: pickRandom(['NONE', 'DEFENCE', 'PHYSICALLY HANDICAPPED', 'SPORTS', null]),
+        caste: pickRandom(["GEN", "BC", "EBC", "SC", "ST", "OTHER"]),
+        reservation: pickRandom([
+          "NONE",
+          "DEFENCE",
+          "PHYSICALLY HANDICAPPED",
+          "SPORTS",
+          null,
+        ]),
         phone: faker.string.numeric(10),
         email: faker.internet.email().toLowerCase(),
         gender: pickRandom([...GENDERS]),
-        DOB: faker.date.birthdate({ min: 17, max: 25, mode: 'age' }).toISOString().split('T')[0],
-        admissionType: pickRandom(['MERIT', 'SPORT', 'MANAGEMENT QUOTA', 'OTHER']),
+        DOB: faker.date
+          .birthdate({ min: 17, max: 25, mode: "age" })
+          .toISOString()
+          .split("T")[0],
+        admissionType: pickRandom([
+          "MERIT",
+          "SPORT",
+          "MANAGEMENT QUOTA",
+          "OTHER",
+        ]),
         subMJC: mjcSubject.id,
         subMIC: selectedMic,
         subMDC: selectedMdc,
@@ -165,9 +195,14 @@ export async function seedStudents() {
     const insertedEnrolled = await db
       .insert(EnrolledStudentTable)
       .values(enrolledValues)
-      .returning({ id: EnrolledStudentTable.id, UAN: EnrolledStudentTable.UAN });
+      .returning({
+        id: EnrolledStudentTable.id,
+        UAN: EnrolledStudentTable.UAN,
+      });
 
-    console.log(`   ✅ Enrolled ${insertedEnrolled.length} students seeded successfully.`);
+    console.log(
+      `   ✅ Enrolled ${insertedEnrolled.length} students seeded successfully.`,
+    );
     console.log("🎉 Student seeding completed successfully!");
   } catch (error) {
     console.error("❌ Student seeding failed:", error);

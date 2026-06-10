@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 export const addDepartmentSchema = z.object({
-  subjectId: z.string().min(1, { message: "Subject is required" }),
+  name: z
+    .string()
+    .min(1, { message: "Department name is required" })
+    .max(30, { message: "Name cannot be more than 30 characters" }),
   code: z
     .string()
     .max(10, { message: "Code cannot be more than 10 characters" })

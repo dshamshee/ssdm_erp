@@ -59,14 +59,8 @@ export function EditSessionDialog({
       isActive: session.isActive,
     },
   });
-  const startYear = useWatch({
-    control: form.control,
-    name: "startYear",
-  });
-  const endYear = useWatch({
-    control: form.control,
-    name: "endYear",
-  });
+  const startYear = useWatch({ control: form.control, name: "startYear" });
+  const endYear = useWatch({ control: form.control, name: "endYear" });
   const startYearValue = startYear ?? defaultStartYear;
   const endYearValue = endYear ?? defaultEndYear;
   const startYearOptions = getStartYearOptions(startYearValue);
@@ -141,11 +135,7 @@ export function EditSessionDialog({
                         </NativeSelectOption>
                       ))}
                     </NativeSelect>
-                    <FieldError
-                      errors={[
-                        fieldState.error,
-                      ]}
-                    />
+                    <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
               )}
@@ -172,11 +162,7 @@ export function EditSessionDialog({
                         </NativeSelectOption>
                       ))}
                     </NativeSelect>
-                    <FieldError
-                      errors={[
-                        fieldState.error,
-                      ]}
-                    />
+                    <FieldError errors={[fieldState.error]} />
                   </FieldContent>
                 </Field>
               )}

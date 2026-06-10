@@ -41,22 +41,12 @@ export function AddSubjectSheet() {
 
   const form = useForm<AddSubjectSchema>({
     resolver: zodResolver(addSubjectSchema) as never,
-    defaultValues: {
-      name: "",
-      code: "",
-      type: "MJC",
-      hasPractical: false,
-    },
+    defaultValues: { name: "", code: "", type: "MJC", hasPractical: false },
   });
 
   async function onSubmit(values: AddSubjectSchema) {
     await addSubject.mutateAsync(values);
-    form.reset({
-      name: "",
-      code: "",
-      type: "MJC",
-      hasPractical: false,
-    });
+    form.reset({ name: "", code: "", type: "MJC", hasPractical: false });
     setOpen(false);
   }
 
@@ -94,11 +84,7 @@ export function AddSubjectSheet() {
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                        ]}
-                      />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}
@@ -116,11 +102,7 @@ export function AddSubjectSheet() {
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                        ]}
-                      />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}
@@ -145,11 +127,7 @@ export function AddSubjectSheet() {
                           </NativeSelectOption>
                         ))}
                       </NativeSelect>
-                      <FieldError
-                        errors={[
-                          fieldState.error,
-                        ]}
-                      />
+                      <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
                 )}

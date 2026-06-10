@@ -4,14 +4,22 @@ import {
   academicSessionTable,
   departmentTable,
   subjectTable,
+  courseTable,
+  batchTable,
 } from "@/lib/db/schema";
 
-// Change this number to insert more data in the future
 const NUM_RECORDS = 5;
 
 async function main() {
-  console.log(`🌱 Seeding ${NUM_RECORDS} records for each independent table...`);
+  console.log(`🌱 Seeding master tables for students...`);
   try {
+    // Clear existing data to prevent unique constraint errors
+    await db.delete(batchTable);
+    await db.delete(courseTable);
+    await db.delete(subjectTable);
+    await db.delete(departmentTable);
+    await db.delete(academicSessionTable);
+
     // 1. Seed Academic Sessions
     const sessions = Array.from({ length: NUM_RECORDS }).map((_, i) => {
       const startYear = 2020 + i;
@@ -20,45 +28,85 @@ async function main() {
         name: `${startYear}-${endYear}`,
         startDate: `${startYear}-07-01`,
         endDate: `${endYear}-06-30`,
-        isActive: i === NUM_RECORDS - 1, // Make the last one active
       };
     });
-    
-    await db.insert(academicSessionTable).values(sessions);
+
+    const insertedSessions = await db
+      .insert(academicSessionTable)
+      .values(sessions)
+      .returning();
     console.log(`✅ Seeded ${NUM_RECORDS} academic sessions.`);
 
-    // 2. Seed Departments
-    const uniqueDeptNames = faker.helpers.uniqueArray(faker.company.name, NUM_RECORDS);
-    const uniqueDeptCodes = faker.helpers.uniqueArray(
-      () => faker.string.alphanumeric({ length: 8, casing: "upper" }),
-      NUM_RECORDS
-    );
-    const departments = Array.from({ length: NUM_RECORDS }).map((_, i) => ({
-      code: uniqueDeptCodes[i],
-      name: uniqueDeptNames[i].slice(0, 30),
-      description: faker.lorem.sentence().slice(0, 100),
+    // 2. Seed Departments (Required by student.ts: PHYS, CHEM, MATH, COMP, COMM)
+    const deptCodes = ["PHYS", "CHEM", "MATH", "COMP", "COMM"];
+    const deptNames = [
+      "Physics",
+      "Chemistry",
+      "Mathematics",
+      "Computer Applications",
+      "Commerce",
+    ];
+    const departments = deptCodes.map((code, i) => ({
+      code,
+      name: deptNames[i],
+      description: `Department of ${deptNames[i]}`,
     }));
-    
-    await db.insert(departmentTable).values(departments);
-    console.log(`✅ Seeded ${NUM_RECORDS} departments.`);
 
-    // 3. Seed Subjects
-    const uniqueSubjectCodes = faker.helpers.uniqueArray(
-      () => faker.string.alphanumeric({ length: 8, casing: "upper" }),
-      NUM_RECORDS
-    );
-    const subjectTypes = ["MJC", "MIC", "MDC", "SEC", "VAC"] as const;
-    const subjects = Array.from({ length: NUM_RECORDS }).map((_, i) => ({
-      code: uniqueSubjectCodes[i],
-      name: `${faker.science.chemicalElement().name} ${faker.word.adjective()} ${i}`.slice(0, 100),
-      type: faker.helpers.arrayElement(subjectTypes),
-      hasPractical: faker.datatype.boolean(),
-    }));
-    
-    await db.insert(subjectTable).values(subjects);
-    console.log(`✅ Seeded ${NUM_RECORDS} subjects.`);
+    const insertedDepts = await db
+      .insert(departmentTable)
+      .values(departments)
+      .returning();
+    console.log(`✅ Seeded ${departments.length} departments.`);
 
-    console.log(`🎉 Successfully seeded independent tables!`);
+    // 3. Seed Courses and Batches for each department
+    for (const dept of insertedDepts) {
+      const course = {
+        name: `B.Sc in ${dept.name}`,
+        code: `BSC-${dept.code}`,
+        type: "UG Regular",
+        departmentId: dept.id,
+        duration: 4,
+      };
+
+      const [insertedCourse] = await db
+        .insert(courseTable)
+        .values(course)
+        .returning();
+
+      const batch = {
+        courseId: insertedCourse.id,
+        academicSessionId: insertedSessions[insertedSessions.length - 1].id, // Most recent session
+        perSemesterFee: 5000,
+        isActive: true,
+      };
+
+      await db.insert(batchTable).values(batch);
+    }
+    console.log(`✅ Seeded courses and batches.`);
+
+    // 4. Seed Subjects (Required by student.ts: codes like PHY-MJC1, MIC, MDC, etc.)
+    const subjectPrefixes = ["PHY", "CHM", "MAT", "BCA", "COM"];
+    const types = ["MJC", "MIC", "MDC", "AEC", "SEC", "VAC"];
+    const subjectsToInsert = [];
+
+    let subjectCounter = 1;
+    for (const prefix of subjectPrefixes) {
+      for (const type of types) {
+        subjectsToInsert.push({
+          code: `${prefix}-${type}${subjectCounter++}`,
+          name: `${type} of ${prefix}`,
+          category: ["PHY", "CHM", "MAT", "BCA"].includes(prefix)
+            ? "SCIENCE"
+            : "COMMERCE",
+          hasPractical: type === "MJC" || type === "MIC",
+        });
+      }
+    }
+
+    await db.insert(subjectTable).values(subjectsToInsert);
+    console.log(`✅ Seeded ${subjectsToInsert.length} subjects.`);
+
+    console.log(`🎉 Successfully seeded master tables!`);
     process.exit(0);
   } catch (error) {
     console.error("❌ Seeding execution failed:", error);

@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 function Card({
   className,
@@ -19,11 +19,11 @@ function Card({
         "has-[>img:first-child]:pt-0",
         "data-[size=sm]:gap-4 data-[size=sm]:py-4",
         "*:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -39,11 +39,11 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
         // Stronger bottom border for clear section separation
         "[.border-b]:pb-6 [.border-b]:border-foreground/10",
         "group-data-[size=sm]/card:[.border-b]:pb-4",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
@@ -54,11 +54,11 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
         // Heavier weight + tighter tracking for clarity
         "font-heading text-base font-semibold leading-snug tracking-tight text-foreground",
         "group-data-[size=sm]/card:text-sm",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
@@ -68,11 +68,11 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         // Slightly larger, better contrast than pure muted
         "text-sm leading-relaxed text-muted-foreground/90",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
@@ -81,11 +81,11 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="card-action"
       className={cn(
         "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
@@ -95,11 +95,11 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         "px-6 text-sm leading-relaxed text-foreground/90",
         "group-data-[size=sm]/card:px-4",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
@@ -112,11 +112,11 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
         // Stronger top border visibility
         "[.border-t]:pt-6 [.border-t]:border-foreground/10",
         "group-data-[size=sm]/card:[.border-t]:pt-4",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -127,4 +127,4 @@ export {
   CardAction,
   CardDescription,
   CardContent,
-}
+};

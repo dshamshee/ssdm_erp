@@ -1,9 +1,3 @@
-
-export const InputForDocumentUpload = ()=>{
-
-  return (
-    <>
-    Input for document upload form
-    </>
-  )
-}
+export const InputForDocumentUpload = () => {
+  return <>Input for document upload form</>;
+};

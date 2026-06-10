@@ -13,28 +13,17 @@ import {
 } from "./zod-type/subject-type";
 
 async function getAdminSession() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    return {
-      success: false as const,
-      message: "Unauthorized",
-    };
+    return { success: false as const, message: "Unauthorized" };
   }
 
   if (session.user.role !== "admin" && session.user.role !== "superAdmin") {
-    return {
-      success: false as const,
-      message: "Forbidden",
-    };
+    return { success: false as const, message: "Forbidden" };
   }
 
-  return {
-    success: true as const,
-    data: session,
-  };
+  return { success: true as const, data: session };
 }
 
 export async function getSubjects() {
@@ -45,16 +34,10 @@ export async function getSubjects() {
     }
 
     const subjects = await db.query.subjectTable.findMany({
-      orderBy: [
-        desc(subjectTable.updatedAt),
-        desc(subjectTable.createdAt),
-      ],
+      orderBy: [desc(subjectTable.updatedAt), desc(subjectTable.createdAt)],
     });
 
-    return {
-      success: true,
-      data: subjects,
-    };
+    return { success: true, data: subjects };
   } catch (error) {
     return {
       success: false,
@@ -73,10 +56,7 @@ export async function addSubject(input: AddSubjectSchema) {
 
     const parsedInput = addSubjectSchema.safeParse(input);
     if (!parsedInput.success) {
-      return {
-        success: false,
-        message: "Invalid subject details",
-      };
+      return { success: false, message: "Invalid subject details" };
     }
 
     const [subject] = await db
@@ -90,15 +70,11 @@ export async function addSubject(input: AddSubjectSchema) {
       })
       .returning();
 
-    return {
-      success: true,
-      data: subject,
-    };
+    return { success: true, data: subject };
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to add subject",
+      message: error instanceof Error ? error.message : "Failed to add subject",
     };
   }
 }
@@ -112,38 +88,22 @@ export async function updateSubject(input: UpdateSubjectSchema) {
 
     const parsedInput = updateSubjectSchema.safeParse(input);
     if (!parsedInput.success) {
-      return {
-        success: false,
-        message: "Invalid subject details",
-      };
+      return { success: false, message: "Invalid subject details" };
     }
 
     const { id, name, code, type, hasPractical, isActive } = parsedInput.data;
 
     const [subject] = await db
       .update(subjectTable)
-      .set({
-        name,
-        code,
-        type,
-        hasPractical,
-        isActive,
-        updatedAt: new Date(),
-      })
+      .set({ name, code, type, hasPractical, isActive, updatedAt: new Date() })
       .where(eq(subjectTable.id, id))
       .returning();
 
     if (!subject) {
-      return {
-        success: false,
-        message: "Subject not found",
-      };
+      return { success: false, message: "Subject not found" };
     }
 
-    return {
-      success: true,
-      data: subject,
-    };
+    return { success: true, data: subject };
   } catch (error) {
     return {
       success: false,

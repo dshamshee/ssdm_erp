@@ -12,46 +12,48 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const urls: Record<string, string> = {};
 
-    const uploadPromises = Array.from(formData.entries()).map(async ([key, value]) => {
-      if (value && value instanceof File) {
-        const file = value as File;
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+    const uploadPromises = Array.from(formData.entries()).map(
+      async ([key, value]) => {
+        if (value && value instanceof File) {
+          const file = value as File;
+          const arrayBuffer = await file.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
 
-        // Upload to Cloudinary using streams
-        const secureUrl = await new Promise<string>((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: "student-registration",
-              public_id: `${Date.now()}-${file.name.split(".")[0]}`.replace(/[^a-zA-Z0-9-_]/g, ""),
-              resource_type: "auto",
-              transformation: [
-                { width: 1200, height: 1200, crop: "limit" }, // Limit dimensions to keep it compact
-                { quality: "auto:eco" }, // Compress quality to reduce file size under 200kb
-                { fetch_format: "auto" } // Auto convert to webp/avif if possible
-              ]
-            },
-            (error, result) => {
-              if (error) {
-                console.error(`[Cloudinary Upload Error for ${key}]:`, error);
-                return reject(error);
-              }
-              resolve(result?.secure_url || "");
-            }
-          );
-          uploadStream.end(buffer);
-        });
+          // Upload to Cloudinary using streams
+          const secureUrl = await new Promise<string>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "student-registration",
+                public_id: `${Date.now()}-${file.name.split(".")[0]}`.replace(
+                  /[^a-zA-Z0-9-_]/g,
+                  "",
+                ),
+                resource_type: "auto",
+                transformation: [
+                  { width: 1200, height: 1200, crop: "limit" }, // Limit dimensions to keep it compact
+                  { quality: "auto:eco" }, // Compress quality to reduce file size under 200kb
+                  { fetch_format: "auto" }, // Auto convert to webp/avif if possible
+                ],
+              },
+              (error, result) => {
+                if (error) {
+                  console.error(`[Cloudinary Upload Error for ${key}]:`, error);
+                  return reject(error);
+                }
+                resolve(result?.secure_url || "");
+              },
+            );
+            uploadStream.end(buffer);
+          });
 
-        urls[key] = secureUrl;
-      }
-    });
+          urls[key] = secureUrl;
+        }
+      },
+    );
 
     await Promise.all(uploadPromises);
 
-    return NextResponse.json({
-      success: true,
-      urls,
-    });
+    return NextResponse.json({ success: true, urls });
   } catch (error: any) {
     console.error("[Upload API Route Error]:", error);
     return NextResponse.json(
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
         success: false,
         message: error?.message || "Internal Server Error during file upload",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

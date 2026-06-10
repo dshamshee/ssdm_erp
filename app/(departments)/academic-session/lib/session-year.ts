@@ -8,9 +8,7 @@ export const DEFAULT_ACADEMIC_SESSION_DURATION_YEARS = 4;
 
 function getYearRange(startYear: number, endYear: number) {
   return Array.from(
-    {
-      length: endYear - startYear + 1,
-    },
+    { length: endYear - startYear + 1 },
     (_, index) => startYear + index,
   );
 }
@@ -21,21 +19,16 @@ export function getStartYearOptions(selectedYear?: number) {
     MIN_ACADEMIC_SESSION_YEAR,
     currentYear - START_YEAR_BACK_OFFSET,
   );
-  const maxYear = Math.max(
-    currentYear,
-    selectedYear !== undefined ? selectedYear : currentYear,
-  ) + START_YEAR_FORWARD_OFFSET;
+  const maxYear =
+    Math.max(
+      currentYear,
+      selectedYear !== undefined ? selectedYear : currentYear,
+    ) + START_YEAR_FORWARD_OFFSET;
 
-  return getYearRange(
-    minYear,
-    Math.min(maxYear, MAX_ACADEMIC_SESSION_YEAR),
-  );
+  return getYearRange(minYear, Math.min(maxYear, MAX_ACADEMIC_SESSION_YEAR));
 }
 
-export function getEndYearOptions(
-  startYear: number,
-  selectedYear?: number,
-) {
+export function getEndYearOptions(startYear: number, selectedYear?: number) {
   const currentYear = new Date().getFullYear();
   const minEndYear = startYear + 1;
   const maxEndYear = Math.min(
@@ -51,10 +44,7 @@ export function getEndYearOptions(
   return getYearRange(minEndYear, endYear);
 }
 
-export function getAcademicSessionDetails(
-  startYear: number,
-  endYear: number,
-) {
+export function getAcademicSessionDetails(startYear: number, endYear: number) {
   return {
     name: `${startYear}-${endYear}`,
     startDate: `${startYear}-07-01`,

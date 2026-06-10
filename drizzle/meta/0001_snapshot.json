@@ -110,12 +110,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -202,12 +198,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -217,9 +209,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -289,9 +279,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -422,9 +410,7 @@
         "academic_session_name_unique": {
           "name": "academic_session_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -474,12 +460,8 @@
           "name": "batch_courseSessionId_course_session_id_fk",
           "tableFrom": "batch",
           "tableTo": "course_session",
-          "columnsFrom": [
-            "courseSessionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["courseSessionId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -533,12 +515,8 @@
           "name": "course_session_courseId_course_id_fk",
           "tableFrom": "course_session",
           "tableTo": "course",
-          "columnsFrom": [
-            "courseId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["courseId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -546,12 +524,8 @@
           "name": "course_session_sessionId_academic_session_id_fk",
           "tableFrom": "course_session",
           "tableTo": "academic_session",
-          "columnsFrom": [
-            "sessionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sessionId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -638,12 +612,8 @@
           "name": "course_departmentId_department_id_fk",
           "tableFrom": "course",
           "tableTo": "department",
-          "columnsFrom": [
-            "departmentId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["departmentId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -653,16 +623,12 @@
         "course_name_unique": {
           "name": "course_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         },
         "course_code_unique": {
           "name": "course_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -728,16 +694,12 @@
         "department_code_unique": {
           "name": "department_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         },
         "department_name_unique": {
           "name": "department_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -830,12 +792,8 @@
           "name": "fee_semesterId_semester_id_fk",
           "tableFrom": "fee",
           "tableTo": "semester",
-          "columnsFrom": [
-            "semesterId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["semesterId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -889,12 +847,8 @@
           "name": "semester_subject_semesterId_semester_id_fk",
           "tableFrom": "semester_subject",
           "tableTo": "semester",
-          "columnsFrom": [
-            "semesterId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["semesterId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -902,12 +856,8 @@
           "name": "semester_subject_subjectId_subject_id_fk",
           "tableFrom": "semester_subject",
           "tableTo": "subject",
-          "columnsFrom": [
-            "subjectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subjectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -967,12 +917,8 @@
           "name": "semester_courseSessionId_course_session_id_fk",
           "tableFrom": "semester",
           "tableTo": "course_session",
-          "columnsFrom": [
-            "courseSessionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["courseSessionId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1061,9 +1007,7 @@
         "subject_code_unique": {
           "name": "subject_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -1082,9 +1026,5 @@
   "roles": {},
   "policies": {},
   "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+  "_meta": { "columns": {}, "schemas": {}, "tables": {} }
 }

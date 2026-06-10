@@ -21,7 +21,9 @@ function AlertDialogTrigger({
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
-  return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />;
+  return (
+    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+  );
 }
 
 function AlertDialogOverlay({
@@ -120,13 +122,17 @@ function AlertDialogDescription({
 function AlertDialogAction({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
-  return <AlertDialogPrimitive.Action data-slot="alert-dialog-action" {...props} />;
+  return (
+    <AlertDialogPrimitive.Action data-slot="alert-dialog-action" {...props} />
+  );
 }
 
 function AlertDialogCancel({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
-  return <AlertDialogPrimitive.Cancel data-slot="alert-dialog-cancel" {...props} />;
+  return (
+    <AlertDialogPrimitive.Cancel data-slot="alert-dialog-cancel" {...props} />
+  );
 }
 
 export {

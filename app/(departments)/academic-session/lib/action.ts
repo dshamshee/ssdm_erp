@@ -14,28 +14,17 @@ import {
 } from "./zod-type/academic-session-type";
 
 async function getAdminSession() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    return {
-      success: false as const,
-      message: "Unauthorized",
-    };
+    return { success: false as const, message: "Unauthorized" };
   }
 
   if (session.user.role !== "admin" && session.user.role !== "superAdmin") {
-    return {
-      success: false as const,
-      message: "Forbidden",
-    };
+    return { success: false as const, message: "Forbidden" };
   }
 
-  return {
-    success: true as const,
-    data: session,
-  };
+  return { success: true as const, data: session };
 }
 
 export async function getAcademicSessions() {
@@ -52,29 +41,16 @@ export async function getAcademicSessions() {
       ],
       with: {
         batches: {
-          with: {
-            course: {
-              with: {
-                department: true,
-              },
-            },
-            semesters: true,
-          },
+          with: { course: { with: { department: true } }, semesters: true },
         },
       },
     });
 
     if (!academicSessions) {
-      return {
-        success: false,
-        message: "No academic sessions found",
-      };
+      return { success: false, message: "No academic sessions found" };
     }
 
-    return {
-      success: true,
-      data: academicSessions,
-    };
+    return { success: true, data: academicSessions };
   } catch (error) {
     return {
       success: false,
@@ -95,10 +71,7 @@ export async function addAcademicSession(input: AddAcademicSessionSchema) {
 
     const parsedInput = addAcademicSessionSchema.safeParse(input);
     if (!parsedInput.success) {
-      return {
-        success: false,
-        message: "Invalid academic session details",
-      };
+      return { success: false, message: "Invalid academic session details" };
     }
 
     const sessionDetails = getAcademicSessionDetails(
@@ -107,16 +80,10 @@ export async function addAcademicSession(input: AddAcademicSessionSchema) {
     );
     const [academicSession] = await db
       .insert(academicSessionTable)
-      .values({
-        ...sessionDetails,
-        isActive: true,
-      })
+      .values({ ...sessionDetails, isActive: true })
       .returning();
 
-    return {
-      success: true,
-      data: academicSession,
-    };
+    return { success: true, data: academicSession };
   } catch (error) {
     return {
       success: false,
@@ -139,43 +106,22 @@ export async function updateAcademicSession(
 
     const parsedInput = updateAcademicSessionSchema.safeParse(input);
     if (!parsedInput.success) {
-      return {
-        success: false,
-        message: "Invalid academic session details",
-      };
+      return { success: false, message: "Invalid academic session details" };
     }
 
-    const {
-      id,
-      startYear,
-      endYear,
-      isActive,
-    } = parsedInput.data;
-    const sessionDetails = getAcademicSessionDetails(
-      startYear,
-      endYear,
-    );
+    const { id, startYear, endYear, isActive } = parsedInput.data;
+    const sessionDetails = getAcademicSessionDetails(startYear, endYear);
     const [academicSession] = await db
       .update(academicSessionTable)
-      .set({
-        ...sessionDetails,
-        isActive,
-        updatedAt: new Date(),
-      })
+      .set({ ...sessionDetails, isActive, updatedAt: new Date() })
       .where(eq(academicSessionTable.id, id))
       .returning();
 
     if (!academicSession) {
-      return {
-        success: false,
-        message: "Academic session not found",
-      };
+      return { success: false, message: "Academic session not found" };
     }
 
-    return {
-      success: true,
-      data: academicSession,
-    };
+    return { success: true, data: academicSession };
   } catch (error) {
     return {
       success: false,

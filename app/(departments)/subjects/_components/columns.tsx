@@ -20,7 +20,9 @@ export const columns: ColumnDef<SubjectRow>[] = [
     accessorKey: "code",
     header: "Code",
     cell: ({ row }) => {
-      return <div className="text-sm text-muted-foreground">{row.original.code}</div>;
+      return (
+        <div className="text-sm text-muted-foreground">{row.original.code}</div>
+      );
     },
   },
   {
@@ -35,7 +37,13 @@ export const columns: ColumnDef<SubjectRow>[] = [
         VAC: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
       };
       return (
-        <Badge className={row.original.type ? typeColors[row.original.type] : "bg-gray-100 text-gray-800"}>
+        <Badge
+          className={
+            row.original.type
+              ? typeColors[row.original.type]
+              : "bg-gray-100 text-gray-800"
+          }
+        >
           {row.original.type || "N/A"}
         </Badge>
       );

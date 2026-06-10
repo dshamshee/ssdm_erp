@@ -1,9 +1,9 @@
-'use client'
-import { PersonalDetailsForm } from "./personal-details-form"
-import { PreviousAcademicDetailsForm } from "./previous-academic-details-form"
-import { DocumentsUploadForm } from "./documents-upload-form"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+"use client";
+import { PersonalDetailsForm } from "./personal-details-form";
+import { PreviousAcademicDetailsForm } from "./previous-academic-details-form";
+import { DocumentsUploadForm } from "./documents-upload-form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   studentDataZodSchema,
   StudentDataType,
@@ -11,72 +11,73 @@ import {
   AcademicDetailsType,
   documentsUploadZodSchema,
   DocumentsUploadType,
-} from '../lib/zod-type/student-data'
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { useMutRegisterStudent } from "../query/mut-register-student"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-
+} from "../lib/zod-type/student-data";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useMutRegisterStudent } from "../query/mut-register-student";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export const StudentRegistration = () => {
-  const [isUploading, setIsUploading] = useState<boolean>(false)
-  const [isUploaded, setIsUploaded] = useState<boolean>(false)
-  const { mutate, isPending } = useMutRegisterStudent()
-  const router = useRouter()
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);
+  const { mutate, isPending } = useMutRegisterStudent();
+  const router = useRouter();
 
   const onUpload = async () => {
-    setIsUploading(true)
+    setIsUploading(true);
     try {
       // 1. Validate the documents form first to ensure correct selections/size checks pass
-      const isDocumentsValid = await documentsForm.trigger()
+      const isDocumentsValid = await documentsForm.trigger();
       if (!isDocumentsValid) {
-        alert("Please correct the validation errors in the documents section before uploading.")
-        return
+        alert(
+          "Please correct the validation errors in the documents section before uploading.",
+        );
+        return;
       }
 
       // 2. Collect files and build FormData
-      const values = documentsForm.getValues()
-      const formData = new FormData()
-      let hasFiles = false
+      const values = documentsForm.getValues();
+      const formData = new FormData();
+      let hasFiles = false;
 
       for (const [key, val] of Object.entries(values)) {
         if (val && val instanceof File) {
-          formData.append(key, val)
-          hasFiles = true
+          formData.append(key, val);
+          hasFiles = true;
         }
       }
 
       if (!hasFiles) {
-        alert("No files selected for upload.")
-        return
+        alert("No files selected for upload.");
+        return;
       }
 
       // 3. Post to /api/upload via Axios
       const response = await axios.post("/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.data && response.data.success && response.data.urls) {
         // 4. Map returned URLs back to form values
         for (const [key, url] of Object.entries(response.data.urls)) {
-          documentsForm.setValue(key as any, url, { shouldValidate: true })
+          documentsForm.setValue(key as any, url, { shouldValidate: true });
         }
-        setIsUploaded(true)
-        alert("All documents uploaded and compressed successfully!")
+        setIsUploaded(true);
+        alert("All documents uploaded and compressed successfully!");
       } else {
-        alert(response.data?.message || "File upload failed.")
+        alert(response.data?.message || "File upload failed.");
       }
     } catch (err: any) {
-      console.error("Upload error:", err)
-      alert(err.response?.data?.message || "An error occurred during file upload.")
+      console.error("Upload error:", err);
+      alert(
+        err.response?.data?.message || "An error occurred during file upload.",
+      );
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   // 1. Personal Details Form
   const personalForm = useForm<StudentDataType>({
@@ -115,8 +116,8 @@ export const StudentRegistration = () => {
       subAEC: [],
       subSEC: [],
       subVAC: [],
-    }
-  })
+    },
+  });
 
   // 2. Previous Academic Details Form
   const academicForm = useForm<AcademicDetailsType>({
@@ -145,8 +146,8 @@ export const StudentRegistration = () => {
       ugDistrict: "",
       ugState: "",
       ugPinCode: "",
-    }
-  })
+    },
+  });
 
   // 3. Documents Upload Form
   const documentsForm = useForm<DocumentsUploadType>({
@@ -162,56 +163,63 @@ export const StudentRegistration = () => {
       previousMarksheet: undefined,
       photo: undefined,
       signature: undefined,
-    }
-  })
+    },
+  });
 
   // Automatically sync documents photo field to personalForm's avatar field
-  const watchedPhoto = documentsForm.watch("photo")
+  const watchedPhoto = documentsForm.watch("photo");
 
   useEffect(() => {
     if (watchedPhoto) {
-      personalForm.setValue("avatar", watchedPhoto, { shouldValidate: true })
+      personalForm.setValue("avatar", watchedPhoto, { shouldValidate: true });
     } else {
-      personalForm.setValue("avatar", undefined, { shouldValidate: true })
+      personalForm.setValue("avatar", undefined, { shouldValidate: true });
     }
-  }, [watchedPhoto, personalForm])
+  }, [watchedPhoto, personalForm]);
 
   const onSubmit = async () => {
     // Trigger validation on all forms in parallel
-    const [isPersonalValid, isAcademicValid, isDocumentsValid] = await Promise.all([
-      personalForm.trigger(),
-      academicForm.trigger(),
-      documentsForm.trigger(),
-    ])
+    const [isPersonalValid, isAcademicValid, isDocumentsValid] =
+      await Promise.all([
+        personalForm.trigger(),
+        academicForm.trigger(),
+        documentsForm.trigger(),
+      ]);
 
     if (!isPersonalValid || !isAcademicValid || !isDocumentsValid) {
-      toast.error("Please correct the validation errors in the form before submitting.")
-      return
+      toast.error(
+        "Please correct the validation errors in the form before submitting.",
+      );
+      return;
     }
 
     // Build the combined payload and pass to the mutation
-    const personalValues = personalForm.getValues()
-    const academicValues = academicForm.getValues()
-    const documentValues = documentsForm.getValues()
+    const personalValues = personalForm.getValues();
+    const academicValues = academicForm.getValues();
+    const documentValues = documentsForm.getValues();
 
     // Documents should now be URL strings after Cloudinary upload
-    const documentsPayload: Record<string, string> = {}
+    const documentsPayload: Record<string, string> = {};
     for (const [key, val] of Object.entries(documentValues)) {
-      documentsPayload[key] = typeof val === "string" ? val : ""
+      documentsPayload[key] = typeof val === "string" ? val : "";
     }
 
-    mutate({
-      personal: personalValues,
-      academic: academicValues,
-      documents: documentsPayload as any,
-    }, {
-      onSuccess: (data) => {
-        const hasPractical = data?.hasPractical ?? false
-        router.push(`/admission/payment?batch=${personalValues.batch}&practical=${hasPractical}`)
+    mutate(
+      {
+        personal: personalValues,
+        academic: academicValues,
+        documents: documentsPayload as any,
       },
-    })
-  }
- 
+      {
+        onSuccess: (data) => {
+          const hasPractical = data?.hasPractical ?? false;
+          router.push(
+            `/admission/payment?batch=${personalValues.batch}&practical=${hasPractical}`,
+          );
+        },
+      },
+    );
+  };
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-10">
@@ -220,7 +228,8 @@ export const StudentRegistration = () => {
           Student Admission Registration
         </h1>
         <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-          Please complete your basic information, academic background, and upload all required documents to finalize your admission.
+          Please complete your basic information, academic background, and
+          upload all required documents to finalize your admission.
         </p>
       </div>
 
@@ -259,5 +268,5 @@ export const StudentRegistration = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

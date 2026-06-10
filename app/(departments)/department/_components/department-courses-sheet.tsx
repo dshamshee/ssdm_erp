@@ -35,9 +35,11 @@ export function DepartmentCoursesSheet({
   departmentId,
   departmentName,
 }: DepartmentCoursesSheetProps) {
-  const { data: courses, isLoading, isError } = useQuery(
-    getCoursesByDepartment(departmentId),
-  );
+  const {
+    data: courses,
+    isLoading,
+    isError,
+  } = useQuery(getCoursesByDepartment(departmentId));
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -49,7 +51,9 @@ export function DepartmentCoursesSheet({
               Department of {departmentName}
             </SheetTitle>
           </div>
-          <SheetDescription>Courses offered by this department</SheetDescription>
+          <SheetDescription>
+            Courses offered by this department
+          </SheetDescription>
         </SheetHeader>
 
         <Separator className="my-4" />
@@ -78,18 +82,20 @@ export function DepartmentCoursesSheet({
           <ul className="grid gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((course) => (
               <li key={course.id}>
-                <Link
-                  href={`/batch/${course.id}`}
-                  className="block h-full"
-                >
+                <Link href={`/batch/${course.id}`} className="block h-full">
                   <Card
                     size="sm"
                     className="h-full transition-colors hover:bg-muted/60"
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="uppercase">{course.name}</CardTitle>
-                        <Badge variant="secondary" className="shrink-0 text-[10px]">
+                        <CardTitle className="uppercase">
+                          {course.name}
+                        </CardTitle>
+                        <Badge
+                          variant="secondary"
+                          className="shrink-0 text-[10px]"
+                        >
                           {course.code}
                         </Badge>
                       </div>

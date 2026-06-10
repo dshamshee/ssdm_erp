@@ -1,11 +1,7 @@
 "use server";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import {
-  courseTable,
-  departmentTable,
-  subjectTable,
-} from "@/lib/db/schema";
+import { courseTable, departmentTable, subjectTable } from "@/lib/db/schema";
 import type { ReturnType } from "@/types/return";
 
 export async function fetchSubjectById(subjectId: string): Promise<ReturnType> {

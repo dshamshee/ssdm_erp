@@ -9,18 +9,8 @@ export const auth = betterAuth({
     provider: "pg", // or "mysql", "sqlite"
     schema: authSchema,
   }),
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: false,
-  },
+  emailAndPassword: { enabled: true, autoSignIn: false },
   user: {
-    additionalFields: {
-      role: {
-        type: [
-          ...userRoleValues,
-        ],
-        required: true,
-      },
-    },
+    additionalFields: { role: { type: [...userRoleValues], required: true } },
   },
 });

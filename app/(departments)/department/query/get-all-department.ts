@@ -1,14 +1,12 @@
 import { queryOptions } from "@tanstack/react-query";
-import { fetchCourseById } from "../lib/action";
 
-export function getCourseDetails({ id }: { id: string }) {
+import { fetchDepartments } from "@/app/(departments)/department/lib/action";
+
+export function getDepartment() {
   return queryOptions({
-    queryKey: [
-      "course-details",
-      id,
-    ],
+    queryKey: ["departments"],
     queryFn: async () => {
-      const res = await fetchCourseById(id);
+      const res = await fetchDepartments();
       if (!res.success) {
         throw new Error(res.message);
       }

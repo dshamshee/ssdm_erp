@@ -14,7 +14,7 @@ export function DepartmentContent() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="w-full sm:max-w-sm">
           <Input
-            placeholder="Subject name to search department.."
+            placeholder="Department name to search department.."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />

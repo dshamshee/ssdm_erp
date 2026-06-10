@@ -1,7 +1,3 @@
-
-export default function PaymentPage (){
-
-  return (
-    <>This is a a Payment Page</>
-  )
+export default function PaymentPage() {
+  return <>This is a a Payment Page</>;
 }

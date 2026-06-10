@@ -2,15 +2,9 @@ import { z } from "zod";
 
 const academicSessionYearSchema = z
   .number()
-  .int({
-    message: "Select a valid year",
-  })
-  .min(2000, {
-    message: "Select a valid year",
-  })
-  .max(2100, {
-    message: "Select a valid year",
-  });
+  .int({ message: "Select a valid year" })
+  .min(2000, { message: "Select a valid year" })
+  .max(2100, { message: "Select a valid year" });
 
 export const addAcademicSessionSchema = z
   .object({
@@ -24,9 +18,7 @@ export const addAcademicSessionSchema = z
 
 export const updateAcademicSessionSchema = z
   .object({
-    id: z.string().min(1, {
-      message: "Session id is required",
-    }),
+    id: z.string().min(1, { message: "Session id is required" }),
     startYear: academicSessionYearSchema,
     endYear: academicSessionYearSchema,
     isActive: z.boolean(),

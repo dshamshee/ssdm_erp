@@ -18,18 +18,12 @@ import {
 export function MainSigninForm() {
   const form = useForm<SigninSchema>({
     resolver: zodResolver(signinSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (data: SigninSchema) => {
     await signIn.email(
-      {
-        email: data.email,
-        password: data.password,
-      },
+      { email: data.email, password: data.password },
       {
         onSuccess: () => {
           alert("Sign in success");

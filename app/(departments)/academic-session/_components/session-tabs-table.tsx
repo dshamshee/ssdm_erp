@@ -38,16 +38,12 @@ function CourseBatchDetails({ session }: { session: AcademicSessionRow }) {
         <TableBody>
           {session.batches.map((batch) => (
             <TableRow key={batch.id}>
-              <TableCell className="font-medium">
-                {batch.course.name}
-              </TableCell>
+              <TableCell className="font-medium">{batch.course.name}</TableCell>
               <TableCell>{batch.course.department.name}</TableCell>
               <TableCell>{batch.semesters.length}</TableCell>
               <TableCell>
                 <Badge
-                  variant={
-                    batch.course.isActive ? "default" : "secondary"
-                  }
+                  variant={batch.course.isActive ? "default" : "secondary"}
                 >
                   {batch.course.isActive ? "Active" : "Inactive"}
                 </Badge>

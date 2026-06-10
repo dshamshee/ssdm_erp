@@ -3,9 +3,7 @@ import { getAcademicSessions } from "@/app/(departments)/academic-session/lib/ac
 
 export const getAcademicSessionsQuery = () =>
   queryOptions({
-    queryKey: [
-      "academic-sessions",
-    ],
+    queryKey: ["academic-sessions"],
     queryFn: async () => {
       const res = await getAcademicSessions();
       if (!res.success) {
