@@ -214,7 +214,7 @@ export const StudentRegistration = () => {
         onSuccess: (data) => {
           const hasPractical = data?.hasPractical ?? false;
           router.push(
-            `/admission/payment?batch=${personalValues.batch}&studentId=${data.id}&practical=${hasPractical}`,
+            `/admission/payment?batch=${personalValues.batch}&practical=${hasPractical}&studentId=${data.id}`,
           );
         },
       },

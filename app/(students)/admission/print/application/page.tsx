@@ -1,510 +1,406 @@
-import { getCollegeConfig } from "@/lib/college-config";
 import { db } from "@/lib/db";
-import {
-  AdmittedStudentTable,
-  StudentPreviousAcademicRecordTable,
-  subjectTable,
-} from "@/lib/db/schema";
+import { AdmittedStudentTable, batchTable, courseTable, academicSessionTable, subjectTable, StudentPreviousAcademicRecordTable } from "@/lib/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import { ShieldAlert, Printer, ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { getCollegeConfig } from "@/lib/college-config";
+import { ShieldAlert } from "lucide-react";
 import { PrintTrigger } from "../_components/print-trigger";
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-async function getApplicationDetails(studentId: string) {
-  try {
-    const student = await db.query.AdmittedStudentTable.findFirst({
-      where: eq(AdmittedStudentTable.id, studentId),
-      with: { batch: { with: { course: true, academicSession: true } } },
-    });
-
-    if (!student)
-      return { student: null, academic: null, subjectMap: new Map() };
-
-    const academic =
-      await db.query.StudentPreviousAcademicRecordTable.findFirst({
-        where: eq(StudentPreviousAcademicRecordTable.studentId, studentId),
-      });
-
-    const subjectIds = [
-      student.subMJC,
-      ...(student.subMIC || []),
-      ...(student.subMDC || []),
-      ...(student.subAEC || []),
-      ...(student.subSEC || []),
-      ...(student.subVAC || []),
-    ].filter(Boolean);
-
-    let subjects: any[] = [];
-    if (subjectIds.length > 0) {
-      subjects = await db
-        .select()
-        .from(subjectTable)
-        .where(inArray(subjectTable.id, subjectIds));
-    }
-
-    const subjectMap = new Map(subjects.map((s) => [s.id, s]));
-
-    return { student, academic, subjectMap };
-  } catch (error) {
-    console.error("getApplicationDetails error:", error);
-    return { student: null, academic: null, subjectMap: new Map() };
-  }
-}
-
-export default async function PrintApplicationPage({
-  searchParams,
-}: PageProps) {
+export default async function PrintApplicationPage({ searchParams }: PageProps) {
   const config = getCollegeConfig();
   const resolvedParams = await searchParams;
   const studentId = resolvedParams.studentId as string;
 
-  const { student, academic, subjectMap } = studentId
-    ? await getApplicationDetails(studentId)
-    : { student: null, academic: null, subjectMap: new Map() };
+  if (!studentId) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 text-center">
+        <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="font-bold text-slate-800 text-sm">Access Denied</h3>
+        <p className="text-slate-500 text-xs max-w-sm mt-2">
+          No student ID parameters were detected. Please complete the registration workflow.
+        </p>
+      </div>
+    );
+  }
+
+  // Fetch student, batch, course, session, and previous academic records
+  const student = await db
+    .select({
+      id: AdmittedStudentTable.id,
+      name: AdmittedStudentTable.name,
+      collegeRoll: AdmittedStudentTable.collegeRoll,
+      UAN: AdmittedStudentTable.UAN,
+      registrationNumber: AdmittedStudentTable.registrationNumber,
+      universityRoll: AdmittedStudentTable.universityRoll,
+      admissionNumber: AdmittedStudentTable.admissionNumber,
+      confidentialNumber: AdmittedStudentTable.confidentialNumber,
+      profileNumber: AdmittedStudentTable.profileNumber,
+      admissionType: AdmittedStudentTable.admissionType,
+      ABCID: AdmittedStudentTable.ABCID,
+      avatar: AdmittedStudentTable.avatar,
+      DOB: AdmittedStudentTable.DOB,
+      AadharNumber: AdmittedStudentTable.AadharNumber,
+      phone: AdmittedStudentTable.phone,
+      email: AdmittedStudentTable.email,
+      gender: AdmittedStudentTable.gender,
+      fathersName: AdmittedStudentTable.fathersName,
+      mothersName: AdmittedStudentTable.mothersName,
+      religion: AdmittedStudentTable.religion,
+      caste: AdmittedStudentTable.caste,
+      reservation: AdmittedStudentTable.reservation,
+      isMinority: AdmittedStudentTable.isMinority,
+      city: AdmittedStudentTable.city,
+      district: AdmittedStudentTable.district,
+      state: AdmittedStudentTable.state,
+      pinCode: AdmittedStudentTable.pinCode,
+      
+      courseName: courseTable.name,
+      courseCode: courseTable.code,
+      courseType: courseTable.type,
+      sessionName: academicSessionTable.name,
+      
+      schoolName: StudentPreviousAcademicRecordTable.schoolName,
+      board: StudentPreviousAcademicRecordTable.board,
+      obtainedMarks: StudentPreviousAcademicRecordTable.obtainedMarks,
+      totalMarks: StudentPreviousAcademicRecordTable.totalMarks,
+      percentage: StudentPreviousAcademicRecordTable.percentage,
+      rollNo: StudentPreviousAcademicRecordTable.rollNo,
+      rollCode: StudentPreviousAcademicRecordTable.rollCode,
+      academicAddress: StudentPreviousAcademicRecordTable.address,
+      academicCity: StudentPreviousAcademicRecordTable.city,
+      academicDistrict: StudentPreviousAcademicRecordTable.district,
+      academicState: StudentPreviousAcademicRecordTable.state,
+      academicPinCode: StudentPreviousAcademicRecordTable.pinCode,
+      
+      ugInstituteName: StudentPreviousAcademicRecordTable.ugInstituteName,
+      ugUniversityName: StudentPreviousAcademicRecordTable.ugUniversityName,
+      ugObtainedMarks: StudentPreviousAcademicRecordTable.ugObtainedMarks,
+      ugTotalMarks: StudentPreviousAcademicRecordTable.ugTotalMarks,
+      ugPercentage: StudentPreviousAcademicRecordTable.ugPercentage,
+      ugRollNo: StudentPreviousAcademicRecordTable.ugRollNo,
+      
+      subMJC: AdmittedStudentTable.subMJC,
+      subMIC: AdmittedStudentTable.subMIC,
+      subMDC: AdmittedStudentTable.subMDC,
+      subAEC: AdmittedStudentTable.subAEC,
+      subSEC: AdmittedStudentTable.subSEC,
+      subVAC: AdmittedStudentTable.subVAC,
+    })
+    .from(AdmittedStudentTable)
+    .innerJoin(batchTable, eq(AdmittedStudentTable.batchId, batchTable.id))
+    .innerJoin(courseTable, eq(batchTable.courseId, courseTable.id))
+    .innerJoin(academicSessionTable, eq(batchTable.academicSessionId, academicSessionTable.id))
+    .leftJoin(StudentPreviousAcademicRecordTable, eq(StudentPreviousAcademicRecordTable.studentId, AdmittedStudentTable.id))
+    .where(eq(AdmittedStudentTable.id, studentId))
+    .then((rows) => rows[0]);
+
+  if (!student) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 text-center">
+        <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="font-bold text-slate-800 text-sm">Student Record Not Found</h3>
+        <p className="text-slate-500 text-xs max-w-sm mt-2">
+          We could not resolve any admitted student details matching this student ID.
+        </p>
+      </div>
+    );
+  }
+
+  // Load subject names
+  const allSubjectIds = [
+    student.subMJC,
+    ...(student.subMIC || []),
+    ...(student.subMDC || []),
+    ...(student.subAEC || []),
+    ...(student.subSEC || []),
+    ...(student.subVAC || []),
+  ].filter(Boolean);
+
+  let subjects: any[] = [];
+  if (allSubjectIds.length > 0) {
+    subjects = await db
+      .select()
+      .from(subjectTable)
+      .where(inArray(subjectTable.id, allSubjectIds));
+  }
+
+  const subjectMap = new Map(subjects.map((s) => [s.id, s]));
+  const getSubjectName = (idOrArr: any) => {
+    if (!idOrArr) return "N/A";
+    if (Array.isArray(idOrArr)) {
+      return idOrArr.map(id => subjectMap.get(id)?.name || id).join(", ");
+    }
+    return subjectMap.get(idOrArr)?.name || idOrArr;
+  };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", {
       day: "2-digit",
-      month: "2-digit",
+      month: "long",
       year: "numeric",
     });
   };
 
-  const getSubjectText = (id: string) => {
-    const sub = subjectMap.get(id);
-    return sub ? `${sub.name} (${sub.code})` : "N/A";
-  };
-
   return (
-    <div className="min-h-screen bg-slate-100 print:bg-white text-slate-850 p-4 sm:p-8 font-sans selection:bg-blue-900 selection:text-white">
-      {/* Print Trigger */}
-      {student && <PrintTrigger />}
+    <div className="min-h-screen bg-white text-slate-900 font-serif leading-relaxed text-xs">
+      {/* Client Trigger Component */}
+      <PrintTrigger />
 
-      {/* Control Actions - hidden in print */}
-      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center bg-white border border-slate-200 rounded-xl p-4 shadow-sm print:hidden">
-        <Link
-          href={`/admission/success?studentId=${studentId}`}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Confirmation
-        </Link>
-        <button
-          type="button"
-          onClick={() => typeof window !== "undefined" && window.print()}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 hover:bg-blue-800 text-white shadow shadow-blue-900/10 cursor-pointer"
-        >
-          <Printer className="h-4 w-4" /> Print Application
-        </button>
-      </div>
+      {/* Printable Sheet */}
+      <div className="max-w-[800px] mx-auto p-8 sm:p-12 space-y-8 print:p-0">
+        
+        {/* Form Header */}
+        <div className="text-center border-b-2 border-slate-900 pb-4 space-y-2 relative">
+          <h1 className="text-2xl font-black tracking-tight text-slate-950 uppercase">{config.name}</h1>
+          <p className="text-[10px] font-semibold text-slate-500 tracking-wider">
+            AFFILIATED TO PATLIPUTRA UNIVERSITY, PATNA &bull; NAAC ACCREDITED
+          </p>
+          <p className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-md w-fit mx-auto uppercase">
+            Admission Application Form ({student.sessionName})
+          </p>
 
-      {student && academic ? (
-        <article className="max-w-4xl mx-auto bg-white border border-slate-300 print:border-0 rounded-2xl print:rounded-none p-8 sm:p-12 shadow-md print:shadow-none space-y-8 relative overflow-hidden">
-          {/* Official Letterhead */}
-          <div className="flex flex-col items-center text-center space-y-2 border-b-2 border-slate-800 pb-4">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight leading-none">
-              {config.name}
-            </h1>
-            <p className="text-[10px] sm:text-xs text-slate-500 font-semibold tracking-wider uppercase">
-              {config.address}, {config.city}, {config.state} &bull; Pincode:{" "}
-              {config.pincode}
-            </p>
-            <p className="text-[9px] text-slate-400 font-medium">
-              Affiliated to Patliputra University, Patna &bull; NAAC Accredited
-            </p>
-            <div className="pt-2">
-              <span className="px-3.5 py-1.5 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-md">
-                Admission Application Form (2026-2027)
+          {/* College Roll Box */}
+          <div className="absolute right-0 top-0 border border-slate-900 px-3 py-1.5 rounded bg-slate-50 text-[10px] text-right font-mono hidden sm:block">
+            <span className="block text-[8px] text-slate-400 font-sans uppercase font-bold">College Roll No.</span>
+            <span className="font-bold text-slate-800">{student.collegeRoll}</span>
+          </div>
+        </div>
+
+        {/* Photo & Primary Identifiers Block */}
+        <div className="grid grid-cols-4 gap-6 items-start">
+          
+          <div className="col-span-3 space-y-4">
+            <h3 className="font-bold text-sm text-slate-900 uppercase border-b border-slate-200 pb-1">
+              1. Admission & Identification Details
+            </h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Unique Admission No (UAN)</span>
+                <span className="font-bold text-slate-800 font-mono text-sm">{student.UAN}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Registration Number</span>
+                <span className="font-semibold text-slate-800">{student.registrationNumber || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Applied Course</span>
+                <span className="font-semibold text-slate-800">{student.courseName} ({student.courseType})</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Admission Category</span>
+                <span className="font-semibold text-slate-800">{student.admissionType}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Academic Session</span>
+                <span className="font-semibold text-slate-800">{student.sessionName}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">ABC ID</span>
+                <span className="font-semibold text-slate-800 font-mono">{student.ABCID || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Student Photo */}
+          <div className="flex flex-col items-center justify-center col-span-1">
+            <div className="w-[120px] h-[140px] border border-slate-300 bg-slate-50 rounded overflow-hidden flex items-center justify-center relative shadow-inner">
+              {student.avatar ? (
+                <img
+                  src={student.avatar}
+                  alt={student.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[9px] text-slate-400 font-sans text-center px-2">Affix Recent Passport Photo</span>
+              )}
+            </div>
+            {student.collegeRoll && (
+              <span className="text-[9px] font-mono font-bold text-slate-600 mt-1.5">
+                Roll: {student.collegeRoll}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Personal Details */}
+        <div className="space-y-4">
+          <h3 className="font-bold text-sm text-slate-900 uppercase border-b border-slate-200 pb-1">
+            2. Personal Profile Information
+          </h3>
+          <div className="grid grid-cols-3 gap-y-3 gap-x-4">
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Candidate Name</span>
+              <span className="font-bold text-slate-800 uppercase">{student.name}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Father's Name</span>
+              <span className="font-semibold text-slate-800 uppercase">{student.fathersName}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Mother's Name</span>
+              <span className="font-semibold text-slate-800 uppercase">{student.mothersName}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Date of Birth</span>
+              <span className="font-semibold text-slate-800">{formatDate(student.DOB)}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Gender</span>
+              <span className="font-semibold text-slate-800">{student.gender}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Aadhar Number</span>
+              <span className="font-semibold text-slate-800 font-mono">{student.AadharNumber}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Caste Category</span>
+              <span className="font-semibold text-slate-800">{student.caste}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Religion</span>
+              <span className="font-semibold text-slate-800">{student.religion}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Minority Community</span>
+              <span className="font-semibold text-slate-800">{student.isMinority ? "Yes" : "No"}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Mobile Phone</span>
+              <span className="font-semibold text-slate-800 font-mono">{student.phone}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Email Address</span>
+              <span className="font-semibold text-slate-800 break-all">{student.email}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 pt-1">
+            <div>
+              <span className="text-slate-400 block uppercase text-[9px] font-semibold">Residential Address</span>
+              <span className="font-semibold text-slate-800 uppercase">
+                {student.city}, {student.district}, {student.state} – {student.pinCode}
               </span>
             </div>
           </div>
+        </div>
 
-          {/* Top Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-            {/* Student Photo Placeholder Box */}
-            <div className="md:col-span-1 flex flex-col items-center">
-              <div className="w-32 h-40 border border-slate-300 rounded-lg overflow-hidden relative bg-slate-50 flex items-center justify-center text-center p-2">
-                {student.avatar ? (
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <span className="text-[9px] text-slate-400 font-medium">
-                    Candidate Photo
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Core Identifiers */}
-            <div className="md:col-span-3 grid grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <span className="text-slate-450 font-bold uppercase tracking-wider block text-[9px]">
-                  College Roll No
-                </span>
-                <span className="font-extrabold text-sm text-slate-900 font-mono">
-                  {student.collegeRoll}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-slate-450 font-bold uppercase tracking-wider block text-[9px]">
-                  Admission Type
-                </span>
-                <span className="font-bold text-slate-800">
-                  {student.admissionType}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-slate-450 font-bold uppercase tracking-wider block text-[9px]">
-                  Unique Admission No (UAN)
-                </span>
-                <span className="font-bold text-slate-800 font-mono">
-                  {student.UAN}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-slate-450 font-bold uppercase tracking-wider block text-[9px]">
-                  Registration Number
-                </span>
-                <span className="font-bold text-slate-800 font-mono">
-                  {student.registrationNumber || "N/A"}
-                </span>
-              </div>
-              <div className="col-span-2 space-y-1">
-                <span className="text-slate-450 font-bold uppercase tracking-wider block text-[9px]">
-                  Applied Program
-                </span>
-                <span className="font-bold text-slate-900 text-xs">
-                  {student.batch?.course?.name} (
-                  {student.batch?.academicSession?.name})
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Section: Personal Details */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-950 bg-slate-100 px-3 py-1 rounded-sm border-l-4 border-slate-800">
-              1. Personal Information
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-[11px] text-slate-700">
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Candidate Name
-                </span>
-                <span className="font-bold text-slate-900 uppercase">
-                  {student.name}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Gender
-                </span>
-                <span className="font-semibold">{student.gender}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Date of Birth
-                </span>
-                <span className="font-semibold">{formatDate(student.DOB)}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Father's Name
-                </span>
-                <span className="font-bold uppercase">
-                  {student.fathersName}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Mother's Name
-                </span>
-                <span className="font-bold uppercase">
-                  {student.mothersName}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Aadhar Number
-                </span>
-                <span className="font-mono font-semibold">
-                  {student.AadharNumber}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Phone Number
-                </span>
-                <span className="font-semibold">{student.phone}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Email Address
-                </span>
-                <span className="font-semibold">{student.email}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Category / Caste
-                </span>
-                <span className="font-bold">
-                  {student.caste}{" "}
-                  {student.reservation ? `(${student.reservation})` : ""}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Religion
-                </span>
-                <span className="font-semibold">{student.religion}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  ABC ID
-                </span>
-                <span className="font-mono font-semibold">
-                  {student.ABCID || "N/A"}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Minority Student
-                </span>
-                <span className="font-semibold">
-                  {student.isMinority ? "Yes" : "No"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Section: Course & Subjects */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-950 bg-slate-100 px-3 py-1 rounded-sm border-l-4 border-slate-800">
-              2. Major / Allied Course Structure
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] text-slate-700">
-              <div className="border border-slate-200 rounded-lg p-3 space-y-2.5">
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Major Course (MJC)
-                  </span>
-                  <span className="font-bold text-slate-900">
-                    {getSubjectText(student.subMJC)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Minor Course (MIC)
-                  </span>
-                  <div className="space-y-0.5 font-bold text-slate-900">
-                    {(student.subMIC || []).map((id: string) => (
-                      <div key={id}>{getSubjectText(id)}</div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Multidisciplinary Course (MDC)
-                  </span>
-                  <div className="space-y-0.5 font-bold text-slate-900">
-                    {(student.subMDC || []).map((id: string) => (
-                      <div key={id}>{getSubjectText(id)}</div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-3 space-y-2.5">
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Ability Enhancement (AEC)
-                  </span>
-                  <div className="space-y-0.5 font-bold text-slate-900">
-                    {(student.subAEC || []).map((id: string) => (
-                      <div key={id}>{getSubjectText(id)}</div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Skill Enhancement (SEC)
-                  </span>
-                  <div className="space-y-0.5 font-bold text-slate-900">
-                    {(student.subSEC || []).map((id: string) => (
-                      <div key={id}>{getSubjectText(id)}</div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-semibold block mb-0.5">
-                    Value Added Course (VAC)
-                  </span>
-                  <div className="space-y-0.5 font-bold text-slate-900">
-                    {(student.subVAC || []).map((id: string) => (
-                      <div key={id}>{getSubjectText(id)}</div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section: Academic Record */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-950 bg-slate-100 px-3 py-1 rounded-sm border-l-4 border-slate-800">
-              3. Previous Academic Records
-            </h2>
-            <div className="border border-slate-300 rounded-lg overflow-hidden text-[10px] text-slate-700">
-              <table className="min-w-full divide-y divide-slate-300 text-left">
-                <thead className="bg-slate-50 font-bold text-slate-800">
-                  <tr>
-                    <th className="px-4 py-2 border-r border-slate-200">
-                      Exam / Degree
-                    </th>
-                    <th className="px-4 py-2 border-r border-slate-200">
-                      Board / University
-                    </th>
-                    <th className="px-4 py-2 border-r border-slate-200">
-                      School / College
-                    </th>
-                    <th className="px-4 py-2 border-r border-slate-200">
-                      Roll (Code-No)
-                    </th>
-                    <th className="px-4 py-2 text-right">Marks & Percentage</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  <tr>
-                    <td className="px-4 py-2.5 font-bold border-r border-slate-200">
-                      Higher Secondary (10+2)
-                    </td>
-                    <td className="px-4 py-2.5 border-r border-slate-200">
-                      {academic.board}
-                    </td>
-                    <td className="px-4 py-2.5 border-r border-slate-200">
-                      {academic.schoolName}
-                    </td>
-                    <td className="px-4 py-2.5 border-r border-slate-200 font-mono">
-                      {academic.rollCode ? `${academic.rollCode}-` : ""}
-                      {academic.rollNo}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-semibold">
-                      {academic.obtainedMarks}/{academic.totalMarks} (
-                      {academic.percentage}%)
-                    </td>
-                  </tr>
-                  {academic.ugInstituteName && (
-                    <tr>
-                      <td className="px-4 py-2.5 font-bold border-r border-slate-200">
-                        Graduation (UG)
-                      </td>
-                      <td className="px-4 py-2.5 border-r border-slate-200">
-                        {academic.ugUniversityName}
-                      </td>
-                      <td className="px-4 py-2.5 border-r border-slate-200">
-                        {academic.ugInstituteName}
-                      </td>
-                      <td className="px-4 py-2.5 border-r border-slate-200 font-mono">
-                        {academic.ugRollNo || "N/A"}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-semibold">
-                        {academic.ugObtainedMarks}/{academic.ugTotalMarks} (
-                        {academic.ugPercentage}%)
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Section: Residential Address */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-950 bg-slate-100 px-3 py-1 rounded-sm border-l-4 border-slate-800">
-              4. Address details
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px] text-slate-700 border border-slate-200 rounded-lg p-4">
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Intermediate School Address
-                </span>
-                <p className="font-semibold text-slate-800">
-                  {academic.address}, {academic.city}, {academic.district},{" "}
-                  {academic.state} – {academic.pinCode}
-                </p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block mb-0.5">
-                  Permanent Residence Address
-                </span>
-                <p className="font-semibold text-slate-800">
-                  {student.city}, {student.district}, {student.state} –{" "}
-                  {student.pinCode}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Candidate Declaration */}
-          <div className="space-y-4 pt-4 border-t border-slate-200 text-[10px] text-slate-600 leading-relaxed">
-            <p>
-              <strong>Declaration:</strong> I hereby declare that all the
-              information furnished above is correct and true to the best of my
-              knowledge and belief. I understand that if any of the details are
-              found to be false or incorrect at any stage, my admission will be
-              subject to immediate cancellation without refund of fees.
-            </p>
-
-            {/* Signatures */}
-            <div className="grid grid-cols-3 gap-8 pt-10 text-center font-bold text-slate-800">
-              <div className="space-y-1">
-                <div className="h-6 border-b border-dashed border-slate-400" />
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-450 block">
-                  Candidate Signature
-                </span>
-              </div>
-              <div className="space-y-1">
-                <div className="h-6 border-b border-dashed border-slate-400" />
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-450 block">
-                  Parent / Guardian Signature
-                </span>
-              </div>
-              <div className="space-y-1">
-                <div className="h-6 border-b border-dashed border-slate-400" />
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-450 block">
-                  College Office Seal & Sign
-                </span>
-              </div>
-            </div>
-          </div>
-        </article>
-      ) : (
-        <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center max-w-md mx-auto space-y-4 shadow">
-          <ShieldAlert className="h-12 w-12 text-destructive mx-auto" />
-          <h3 className="font-bold text-slate-800 text-sm">
-            Failed to Load Form
+        {/* Selected Subjects */}
+        <div className="space-y-4">
+          <h3 className="font-bold text-sm text-slate-900 uppercase border-b border-slate-200 pb-1">
+            3. Subject Choice Selection (CBCS)
           </h3>
-          <p className="text-slate-500 text-xs leading-relaxed">
-            We could not pull the details for print preview. Please check that
-            you provided a valid student identifier.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-900"
-            >
-              Back to Home
-            </Link>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Major Course (MJC)</span>
+              <p className="font-bold text-slate-800">{getSubjectName(student.subMJC)}</p>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Minor Course (MIC)</span>
+              <p className="font-semibold text-slate-800">{getSubjectName(student.subMIC)}</p>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Multidisciplinary (MDC)</span>
+              <p className="font-semibold text-slate-800">{getSubjectName(student.subMDC)}</p>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Ability Enhancement (AEC)</span>
+              <p className="font-semibold text-slate-800">{getSubjectName(student.subAEC)}</p>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Skill Enhancement (SEC)</span>
+              <p className="font-semibold text-slate-800">{getSubjectName(student.subSEC)}</p>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-1">
+              <span className="text-[9px] text-slate-400 font-semibold uppercase">Value Added Course (VAC)</span>
+              <p className="font-semibold text-slate-800">{getSubjectName(student.subVAC)}</p>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Previous Academic Details */}
+        <div className="space-y-4">
+          <h3 className="font-bold text-sm text-slate-900 uppercase border-b border-slate-200 pb-1">
+            4. Prior Academic Background
+          </h3>
+          
+          <table className="w-full border-collapse border border-slate-300 text-left text-[11px]">
+            <thead>
+              <tr className="bg-slate-50">
+                <th className="border border-slate-300 p-2 font-bold uppercase text-[9px] text-slate-500">Qualifying Exam</th>
+                <th className="border border-slate-300 p-2 font-bold uppercase text-[9px] text-slate-500">School/College & Board</th>
+                <th className="border border-slate-300 p-2 font-bold uppercase text-[9px] text-slate-500 text-center">Marks</th>
+                <th className="border border-slate-300 p-2 font-bold uppercase text-[9px] text-slate-500 text-center">Percentage</th>
+                <th className="border border-slate-300 p-2 font-bold uppercase text-[9px] text-slate-500 text-center">Roll No (Code)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-slate-300 p-2 font-semibold">Intermediate (10+2)</td>
+                <td className="border border-slate-300 p-2">
+                  <p className="font-semibold uppercase text-slate-800">{student.schoolName}</p>
+                  <p className="text-[10px] text-slate-400 uppercase mt-0.5">{student.board}</p>
+                </td>
+                <td className="border border-slate-300 p-2 text-center font-semibold">
+                  {student.obtainedMarks} / {student.totalMarks}
+                </td>
+                <td className="border border-slate-300 p-2 text-center font-bold text-slate-800">
+                  {student.percentage}%
+                </td>
+                <td className="border border-slate-300 p-2 text-center font-mono font-semibold">
+                  {student.rollNo} {student.rollCode ? `(${student.rollCode})` : ""}
+                </td>
+              </tr>
+              {student.ugInstituteName && (
+                <tr>
+                  <td className="border border-slate-300 p-2 font-semibold">Graduation (UG)</td>
+                  <td className="border border-slate-300 p-2">
+                    <p className="font-semibold uppercase text-slate-800">{student.ugInstituteName}</p>
+                    <p className="text-[10px] text-slate-400 uppercase mt-0.5">{student.ugUniversityName}</p>
+                  </td>
+                  <td className="border border-slate-300 p-2 text-center font-semibold">
+                    {student.ugObtainedMarks} / {student.ugTotalMarks}
+                  </td>
+                  <td className="border border-slate-300 p-2 text-center font-bold text-slate-800">
+                    {student.ugPercentage}%
+                  </td>
+                  <td className="border border-slate-300 p-2 text-center font-mono font-semibold">
+                    {student.ugRollNo}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Declarations & Signatures */}
+        <div className="space-y-6 pt-6 border-t border-slate-200">
+          <div className="space-y-2 text-[10px] text-slate-500 leading-relaxed font-sans">
+            <p className="font-bold uppercase text-slate-700">Student & Parent Declaration</p>
+            <p>
+              I hereby declare that all the statements and details filled in this admission application form are true, complete, and correct to the best of my knowledge and belief. I understand that if any of the information is found false or inaccurate at any stage, my admission will be cancelled immediately by the college management.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-8 pt-10 text-center font-semibold text-[10px] text-slate-700">
+            <div className="space-y-4">
+              <div className="h-10 border-b border-dashed border-slate-400" />
+              <span>Signature of Candidate</span>
+            </div>
+            <div className="space-y-4">
+              <div className="h-10 border-b border-dashed border-slate-400" />
+              <span>Signature of Parent/Guardian</span>
+            </div>
+            <div className="space-y-4">
+              <div className="h-10 border-b border-dashed border-slate-400" />
+              <span>Principal / Office Verification</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
