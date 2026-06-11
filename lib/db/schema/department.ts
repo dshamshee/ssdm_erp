@@ -115,6 +115,23 @@ export const batchTable = pgTable("batch", {
   updatedAt: timestamp().defaultNow().notNull(),
 });
 
+// This is for check which batch admission is started
+export const admissionOpenTable = pgTable("admission_open", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  batchId: varchar({ length: 128 })
+    .references(() => batchTable.id, { onDelete: "cascade" })
+    .notNull(),
+  startDate: date().notNull(),
+  endDate: date().notNull(),
+  lateFee: integer().default(0),
+  isDateExtended: boolean().default(false),
+  extendedDate: date(), // This field is optional (you can also extend the endDate otherwise set the new date in it)
+  createdAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp().defaultNow().notNull(),
+});
+
 // export const batchTable = pgTable("batch", {
 //   id: varchar({ length: 128 })
 //     .primaryKey()
@@ -227,9 +244,19 @@ export const courseSessionRelations = relations(
       references: [academicSessionTable.id],
     }),
 
-    // batches: many(batchTable),
+    admissionOpen: many(admissionOpenTable),
+  }),
+);
 
-    // semesters: many(semesterTable),
+// ADMISSION OPEN RELATIONS
+
+export const admissionOpenRelations = relations(
+  admissionOpenTable,
+  ({ one }) => ({
+    batch: one(batchTable, {
+      fields: [admissionOpenTable.batchId],
+      references: [batchTable.id],
+    }),
   }),
 );
 

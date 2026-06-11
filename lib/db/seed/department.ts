@@ -6,6 +6,7 @@ import {
   subjectTable,
   courseTable,
   batchTable,
+  admissionOpenTable,
 } from "@/lib/db/schema";
 
 const NUM_RECORDS = 5;
@@ -14,6 +15,7 @@ async function main() {
   console.log(`🌱 Seeding master tables for students...`);
   try {
     // Clear existing data to prevent unique constraint errors
+    await db.delete(admissionOpenTable);
     await db.delete(batchTable);
     await db.delete(courseTable);
     await db.delete(subjectTable);
@@ -59,6 +61,7 @@ async function main() {
     console.log(`✅ Seeded ${departments.length} departments.`);
 
     // 3. Seed Courses and Batches for each department
+    const insertedBatches: Array<{ id: string; deptCode: string }> = [];
     for (const dept of insertedDepts) {
       const course = {
         name: `B.Sc in ${dept.name}`,
@@ -80,11 +83,33 @@ async function main() {
         isActive: true,
       };
 
-      await db.insert(batchTable).values(batch);
+      const [insertedBatch] = await db
+        .insert(batchTable)
+        .values(batch)
+        .returning();
+      insertedBatches.push({ ...insertedBatch, deptCode: dept.code });
     }
     console.log(`✅ Seeded courses and batches.`);
 
-    // 4. Seed Subjects (Required by student.ts: codes like PHY-MJC1, MIC, MDC, etc.)
+    // 4. Seed Admission Open (only for a few batches, not all)
+    const batchesForAdmission = insertedBatches.filter((b) =>
+      ["PHYS", "COMP"].includes(b.deptCode),
+    );
+
+    const admissionOpenRecords = batchesForAdmission.map((batch) => ({
+      batchId: batch.id,
+      startDate: "2024-06-01",
+      endDate: "2024-07-31",
+      lateFee: 500,
+      isDateExtended: false,
+    }));
+
+    await db.insert(admissionOpenTable).values(admissionOpenRecords);
+    console.log(
+      `✅ Seeded ${admissionOpenRecords.length} admission open records (PHYS, COMP only).`,
+    );
+
+    // 5. Seed Subjects (Required by student.ts: codes like PHY-MJC1, MIC, MDC, etc.)
     const subjectPrefixes = ["PHY", "CHM", "MAT", "BCA", "COM"];
     const types = ["MJC", "MIC", "MDC", "AEC", "SEC", "VAC"];
     const subjectsToInsert = [];

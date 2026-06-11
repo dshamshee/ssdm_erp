@@ -15,9 +15,7 @@ export const columns: ColumnDef<BatchRow>[] = [
     header: "Academic Session",
     cell: ({ row }) => {
       return (
-        <div className="font-medium">
-          {row.original.academicSession.name}
-        </div>
+        <div className="font-medium">{row.original.academicSession.name}</div>
       );
     },
   },

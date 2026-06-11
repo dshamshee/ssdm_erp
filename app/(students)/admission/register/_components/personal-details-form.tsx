@@ -311,7 +311,7 @@ export const PersonalDetailsForm = ({
                 name="name"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Student Name</FieldLabel>
+                    <FieldLabel required>Student Name</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -332,7 +332,7 @@ export const PersonalDetailsForm = ({
                 name="gender"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Gender</FieldLabel>
+                    <FieldLabel required>Gender</FieldLabel>
                     <FieldContent>
                       <select
                         {...field}
@@ -357,7 +357,7 @@ export const PersonalDetailsForm = ({
                 name="DOB"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Date of Birth</FieldLabel>
+                    <FieldLabel required>Date of Birth</FieldLabel>
                     <FieldContent>
                       <Input
                         type="date"
@@ -378,7 +378,7 @@ export const PersonalDetailsForm = ({
                 name="fathersName"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Father&apos;s Name</FieldLabel>
+                    <FieldLabel required>Father&apos;s Name</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -399,7 +399,7 @@ export const PersonalDetailsForm = ({
                 name="mothersName"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Mother&apos;s Name</FieldLabel>
+                    <FieldLabel required>Mother&apos;s Name</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -420,7 +420,7 @@ export const PersonalDetailsForm = ({
                 name="AadharNumber"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Aadhar Number</FieldLabel>
+                    <FieldLabel required>Aadhar Number</FieldLabel>
                     <FieldContent>
                       <Input
                         maxLength={12}
@@ -442,7 +442,7 @@ export const PersonalDetailsForm = ({
                 name="phone"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Phone Number</FieldLabel>
+                    <FieldLabel required>Phone Number</FieldLabel>
                     <FieldContent>
                       <Input
                         maxLength={10}
@@ -464,7 +464,7 @@ export const PersonalDetailsForm = ({
                 name="email"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Email Address</FieldLabel>
+                    <FieldLabel required>Email Address</FieldLabel>
                     <FieldContent>
                       <Input
                         type="email"
@@ -486,7 +486,7 @@ export const PersonalDetailsForm = ({
                 name="caste"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Caste</FieldLabel>
+                    <FieldLabel required>Caste</FieldLabel>
                     <FieldContent>
                       <select
                         {...field}
@@ -647,7 +647,7 @@ export const PersonalDetailsForm = ({
                 name="religion"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>Religion</FieldLabel>
+                    <FieldLabel required>Religion</FieldLabel>
                     <FieldContent>
                       <select
                         {...field}
@@ -676,7 +676,7 @@ export const PersonalDetailsForm = ({
                 name="city"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>City</FieldLabel>
+                    <FieldLabel required>City</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -696,7 +696,7 @@ export const PersonalDetailsForm = ({
                 name="district"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>District</FieldLabel>
+                    <FieldLabel required>District</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -716,7 +716,7 @@ export const PersonalDetailsForm = ({
                 name="state"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>State</FieldLabel>
+                    <FieldLabel required>State</FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
@@ -736,7 +736,7 @@ export const PersonalDetailsForm = ({
                 name="pinCode"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel requiredLable>PIN Code</FieldLabel>
+                    <FieldLabel required>PIN Code</FieldLabel>
                     <FieldContent>
                       <Input
                         maxLength={6}

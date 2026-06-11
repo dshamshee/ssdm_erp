@@ -24,6 +24,5 @@ export default async function AcademicSessionPage() {
         <SessionTabsTable />
       </HydrationBoundary>
     </ContentLayout>
-
   );
 }

@@ -36,7 +36,7 @@ export const InputForVerification = ({
         name="uan"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel requiredLable>UAN</FieldLabel>
+            <FieldLabel required>UAN</FieldLabel>
             <FieldContent>
               <Input
                 {...field}
@@ -55,7 +55,7 @@ export const InputForVerification = ({
         name="subMJC"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel requiredLable>MJC Subject</FieldLabel>
+            <FieldLabel required>MJC Subject</FieldLabel>
             <FieldContent>
               <select
                 {...field}

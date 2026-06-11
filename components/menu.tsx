@@ -12,7 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getMenuList } from "@/lib/menu-list"
+import { getMenuList } from "@/lib/menu-list";
 import { cn } from "@/lib/utils";
 
 interface MenuProps {
@@ -65,7 +65,7 @@ export function Menu({ isOpen }: MenuProps) {
                               ((active === undefined &&
                                 pathname.startsWith(href)) ||
                                 active) &&
-                              "bg-sidebar-accent text-sidebar-accent-foreground",
+                                "bg-sidebar-accent text-sidebar-accent-foreground",
                             )}
                             asChild
                           >
@@ -117,7 +117,7 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => { }}
+                    onClick={() => {}}
                     variant="outline"
                     className="w-full justify-center h-10 mt-5"
                   >

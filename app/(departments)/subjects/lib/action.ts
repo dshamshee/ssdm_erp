@@ -96,7 +96,14 @@ export async function updateSubject(input: UpdateSubjectSchema) {
 
     const [subject] = await db
       .update(subjectTable)
-      .set({ name, code, category, hasPractical, isActive, updatedAt: new Date() })
+      .set({
+        name,
+        code,
+        category,
+        hasPractical,
+        isActive,
+        updatedAt: new Date(),
+      })
       .where(eq(subjectTable.id, id))
       .returning();
 

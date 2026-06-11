@@ -9,11 +9,7 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 
-type Submenu = {
-  href: string;
-  label: string;
-  active?: boolean;
-};
+type Submenu = { href: string; label: string; active?: boolean };
 
 type Menu = {
   href: string;
@@ -23,10 +19,7 @@ type Menu = {
   submenus?: Submenu[];
 };
 
-type Group = {
-  groupLabel: string;
-  menus: Menu[];
-};
+type Group = { groupLabel: string; menus: Menu[] };
 
 export function getMenuList(pathname: string): Group[] {
   return [

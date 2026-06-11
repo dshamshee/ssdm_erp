@@ -38,9 +38,7 @@ export function BatchContent({ courseId }: BatchContentProps) {
 
   if (courseError || !course) {
     return (
-      <div className="text-center py-8 text-destructive">
-        Course not found.
-      </div>
+      <div className="text-center py-8 text-destructive">Course not found.</div>
     );
   }
 
@@ -81,9 +79,7 @@ export function BatchContent({ courseId }: BatchContentProps) {
       {/* Batch table */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">
-            Batches ({batches.length})
-          </h2>
+          <h2 className="text-lg font-medium">Batches ({batches.length})</h2>
           <AddBatchDialog courseId={courseId} />
         </div>
         <DataTable columns={columns} data={batches} />

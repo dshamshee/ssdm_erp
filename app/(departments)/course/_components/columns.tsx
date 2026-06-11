@@ -52,7 +52,8 @@ export const columns: ColumnDef<CourseRow>[] = [
     cell: ({ row }) => {
       return (
         <div className="text-sm">
-          {row.original.duration} {row.original.duration === 1 ? "Year" : "Years"}
+          {row.original.duration}{" "}
+          {row.original.duration === 1 ? "Year" : "Years"}
         </div>
       );
     },

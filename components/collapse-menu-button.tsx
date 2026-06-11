@@ -28,11 +28,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type Submenu = {
-  href: string;
-  label: string;
-  active?: boolean;
-};
+type Submenu = { href: string; label: string; active?: boolean };
 
 interface CollapseMenuButtonProps {
   icon: ComponentType<{ className?: string }>;

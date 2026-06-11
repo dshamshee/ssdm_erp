@@ -26,7 +26,9 @@ export function SubjectsContent() {
     }
 
     if (filterCategory) {
-      filtered = filtered.filter((subject) => subject.category === filterCategory);
+      filtered = filtered.filter(
+        (subject) => subject.category === filterCategory,
+      );
     }
 
     return filtered;

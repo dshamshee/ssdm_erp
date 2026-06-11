@@ -3,7 +3,7 @@
 import { Footer } from "@/components/footer";
 import { Sidebar } from "@/components/sidebar";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store"
+import { useStore } from "@/hooks/use-store";
 import { cn } from "@/lib/utils";
 
 export default function AdminPanelLayout({

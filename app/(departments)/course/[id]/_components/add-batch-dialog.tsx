@@ -45,11 +45,7 @@ export function AddBatchDialog({ courseId }: AddBatchDialogProps) {
 
   const form = useForm<AddBatchSchema>({
     resolver: zodResolver(addBatchSchema),
-    defaultValues: {
-      courseId,
-      academicSessionId: "",
-      perSemesterFee: 0,
-    },
+    defaultValues: { courseId, academicSessionId: "", perSemesterFee: 0 },
   });
 
   async function onSubmit(values: AddBatchSchema) {
@@ -78,8 +74,8 @@ export function AddBatchDialog({ courseId }: AddBatchDialogProps) {
           <DialogHeader>
             <DialogTitle>Add Batch</DialogTitle>
             <DialogDescription>
-              Create a new batch by selecting an academic session and setting the
-              per-semester fee.
+              Create a new batch by selecting an academic session and setting
+              the per-semester fee.
             </DialogDescription>
           </DialogHeader>
 
@@ -101,10 +97,7 @@ export function AddBatchDialog({ courseId }: AddBatchDialogProps) {
                         Select a session
                       </NativeSelectOption>
                       {sessions.map((session) => (
-                        <NativeSelectOption
-                          key={session.id}
-                          value={session.id}
-                        >
+                        <NativeSelectOption key={session.id} value={session.id}>
                           {session.name}
                         </NativeSelectOption>
                       ))}
@@ -128,9 +121,7 @@ export function AddBatchDialog({ courseId }: AddBatchDialogProps) {
                       value={field.value === 0 ? "" : field.value}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value === ""
-                            ? 0
-                            : Number(e.target.value),
+                          e.target.value === "" ? 0 : Number(e.target.value),
                         )
                       }
                       aria-invalid={fieldState.invalid}

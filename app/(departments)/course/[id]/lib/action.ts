@@ -5,10 +5,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { batchTable, courseTable } from "@/lib/db/schema";
-import {
-  type AddBatchSchema,
-  addBatchSchema,
-} from "./zod-type/add-batch-type";
+import { type AddBatchSchema, addBatchSchema } from "./zod-type/add-batch-type";
 
 async function getAdminSession() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -45,8 +42,7 @@ export async function fetchCourseById(courseId: string) {
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Error fetching course",
+      message: error instanceof Error ? error.message : "Error fetching course",
     };
   }
 }
@@ -107,20 +103,14 @@ export async function addBatch(input: AddBatchSchema) {
 
     const [batch] = await db
       .insert(batchTable)
-      .values({
-        courseId,
-        academicSessionId,
-        perSemesterFee,
-        isActive: true,
-      })
+      .values({ courseId, academicSessionId, perSemesterFee, isActive: true })
       .returning();
 
     return { success: true, data: batch };
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to add batch",
+      message: error instanceof Error ? error.message : "Failed to add batch",
     };
   }
 }

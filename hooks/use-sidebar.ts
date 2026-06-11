@@ -41,9 +41,6 @@ export const useSidebar = create(
         );
       },
     }),
-    {
-      name: "sidebar",
-      storage: createJSONStorage(() => localStorage),
-    },
+    { name: "sidebar", storage: createJSONStorage(() => localStorage) },
   ),
 );

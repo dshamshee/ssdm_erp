@@ -39,11 +39,7 @@ export async function getAcademicSessions() {
         desc(academicSessionTable.updatedAt),
         desc(academicSessionTable.createdAt),
       ],
-      with: {
-        batches: {
-          with: { course: { with: { department: true } } },
-        },
-      },
+      with: { batches: { with: { course: { with: { department: true } } } } },
     });
 
     if (!academicSessions) {

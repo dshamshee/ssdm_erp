@@ -31,4 +31,3 @@ export type AddAcademicSessionSchema = z.infer<typeof addAcademicSessionSchema>;
 export type UpdateAcademicSessionSchema = z.infer<
   typeof updateAcademicSessionSchema
 >;
-

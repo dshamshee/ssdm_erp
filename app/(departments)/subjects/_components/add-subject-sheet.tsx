@@ -41,12 +41,22 @@ export function AddSubjectSheet() {
 
   const form = useForm<AddSubjectSchema>({
     resolver: zodResolver(addSubjectSchema) as never,
-    defaultValues: { name: "", code: "", category: "SCIENCE", hasPractical: false },
+    defaultValues: {
+      name: "",
+      code: "",
+      category: "SCIENCE",
+      hasPractical: false,
+    },
   });
 
   async function onSubmit(values: AddSubjectSchema) {
     await addSubject.mutateAsync(values);
-    form.reset({ name: "", code: "", category: "SCIENCE", hasPractical: false });
+    form.reset({
+      name: "",
+      code: "",
+      category: "SCIENCE",
+      hasPractical: false,
+    });
     setOpen(false);
   }
 

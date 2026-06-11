@@ -89,7 +89,7 @@ export const PreviousAcademicDetailsForm = ({
               name="schoolName"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>School / College Name</FieldLabel>
+                  <FieldLabel required>School / College Name</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -108,7 +108,7 @@ export const PreviousAcademicDetailsForm = ({
               name="board"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Board / University</FieldLabel>
+                  <FieldLabel required>Board / University</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -127,7 +127,7 @@ export const PreviousAcademicDetailsForm = ({
               name="rollNo"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Roll Number</FieldLabel>
+                  <FieldLabel required>Roll Number</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -146,7 +146,7 @@ export const PreviousAcademicDetailsForm = ({
               name="rollCode"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Roll Code</FieldLabel>
+                  <FieldLabel required>Roll Code</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -168,7 +168,7 @@ export const PreviousAcademicDetailsForm = ({
                 fieldState,
               }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Total Marks</FieldLabel>
+                  <FieldLabel required>Total Marks</FieldLabel>
                   <FieldContent>
                     <Input
                       type="number"
@@ -197,7 +197,7 @@ export const PreviousAcademicDetailsForm = ({
                 fieldState,
               }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Obtained Marks</FieldLabel>
+                  <FieldLabel required>Obtained Marks</FieldLabel>
                   <FieldContent>
                     <Input
                       type="number"
@@ -223,7 +223,7 @@ export const PreviousAcademicDetailsForm = ({
               name="percentage"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>Percentage (%)</FieldLabel>
+                  <FieldLabel required>Percentage (%)</FieldLabel>
                   <FieldContent>
                     <div className="relative flex items-center">
                       <Input
@@ -252,7 +252,7 @@ export const PreviousAcademicDetailsForm = ({
                   data-invalid={fieldState.invalid}
                   className="col-span-1 md:col-span-2"
                 >
-                  <FieldLabel requiredLable>School/College Address</FieldLabel>
+                  <FieldLabel required>School/College Address</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -271,7 +271,7 @@ export const PreviousAcademicDetailsForm = ({
               name="city"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>City</FieldLabel>
+                  <FieldLabel required>City</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -290,7 +290,7 @@ export const PreviousAcademicDetailsForm = ({
               name="district"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>District</FieldLabel>
+                  <FieldLabel required>District</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -309,7 +309,7 @@ export const PreviousAcademicDetailsForm = ({
               name="state"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>State</FieldLabel>
+                  <FieldLabel required>State</FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -328,7 +328,7 @@ export const PreviousAcademicDetailsForm = ({
               name="pinCode"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel requiredLable>PIN Code</FieldLabel>
+                  <FieldLabel required>PIN Code</FieldLabel>
                   <FieldContent>
                     <Input
                       maxLength={6}
