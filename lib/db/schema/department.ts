@@ -132,6 +132,20 @@ export const admissionOpenTable = pgTable("admission_open", {
   updatedAt: timestamp().defaultNow().notNull(),
 });
 
+// This table is for tender
+export const tenderTable = pgTable("tender", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text().notNull(),
+  description: text(),
+  startDate: date().notNull(),
+  endDate: date().notNull(),
+  document: text().notNull(),
+  createdAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp().defaultNow().notNull(),
+});
+
 // export const batchTable = pgTable("batch", {
 //   id: varchar({ length: 128 })
 //     .primaryKey()
