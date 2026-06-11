@@ -1,3 +1,9 @@
+import { ContentLayout } from "@/components/content-layout";
+
 export default function Page() {
-  return <div>Examination Page</div>;
+  return (
+    <ContentLayout title="Examinations">
+      <div>Examination Page</div>
+    </ContentLayout>
+  );
 }

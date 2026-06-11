@@ -7,6 +7,7 @@ import { getAcademicSessionsQuery } from "@/app/(departments)/academic-session/q
 import { BatchContent } from "./_components/batch-content";
 import { getCourseByIdQuery } from "./query/get-course-by-id";
 import { getBatchesByCourseQuery } from "./query/get-batches";
+import { ContentLayout } from "@/components/content-layout";
 
 export default async function CourseBatchPage({
   params,
@@ -23,8 +24,10 @@ export default async function CourseBatchPage({
   ]);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <BatchContent courseId={id} />
-    </HydrationBoundary>
+    <ContentLayout title="Course Batches">
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <BatchContent courseId={id} />
+      </HydrationBoundary>
+    </ContentLayout>
   );
 }

@@ -1,9 +1,11 @@
 import {
-  IconBookmarkFilled,
-  IconCalendarFilled,
-  IconHomeFilled,
-  IconLayoutDashboardFilled,
-  IconUsers,
+  IconSchool,
+  IconHierarchy2,
+  IconBook,
+  IconBook2,
+  IconCalendarEvent,
+  IconUserCheck,
+  IconClipboardCheck,
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 
@@ -26,71 +28,57 @@ type Group = {
   menus: Menu[];
 };
 
-export function getMenuList(_pathname: string): Group[] {
+export function getMenuList(pathname: string): Group[] {
   return [
     {
-      groupLabel: "",
-      menus: [
-        {
-          href: "/dashboard",
-          label: "Dashboard",
-          icon: IconLayoutDashboardFilled,
-          submenus: [],
-        },
-      ],
-    },
-    // {
-    //   groupLabel: "",
-    //   menus: [
-    //     {
-    //       href: "",
-    //       label: "Posts",
-    //       icon: SquarePen,
-    //       submenus: [
-    //         {
-    //           href: "/posts",
-    //           label: "All Posts",
-    //         },
-    //         {
-    //           href: "/posts/new",
-    //           label: "New Post",
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       href: "/categories",
-    //       label: "Categories",
-    //       icon: Bookmark,
-    //     },
-    //     {
-    //       href: "/tags",
-    //       label: "Tags",
-    //       icon: Tag,
-    //     },
-    //   ],
-    // },
-    {
-      groupLabel: "",
+      groupLabel: "Academic Setup",
       menus: [
         {
           href: "/college",
-          label: "Manage colleges",
-          icon: IconBookmarkFilled,
+          label: "Colleges",
+          icon: IconSchool,
+          active: pathname.startsWith("/college"),
+        },
+        {
+          href: "/department",
+          label: "Departments",
+          icon: IconHierarchy2,
+          active: pathname.startsWith("/department"),
+        },
+        {
+          href: "/course",
+          label: "Courses",
+          icon: IconBook,
+          active: pathname.startsWith("/course"),
+        },
+        {
+          href: "/subjects",
+          label: "Subjects",
+          icon: IconBook2,
+          active: pathname.startsWith("/subjects"),
         },
         {
           href: "/academic-session",
-          label: "Academic sessions",
-          icon: IconCalendarFilled,
+          label: "Academic Sessions",
+          icon: IconCalendarEvent,
+          active: pathname.startsWith("/academic-session"),
+        },
+      ],
+    },
+    {
+      groupLabel: "Student Operations",
+      menus: [
+        {
+          href: "/admission",
+          label: "Admission",
+          icon: IconUserCheck,
+          active: pathname.startsWith("/admission"),
         },
         {
-          href: "/add/candidate",
-          label: "Internship",
-          icon: IconUsers,
-        },
-        {
-          href: "/home",
-          label: "Home Page",
-          icon: IconHomeFilled,
+          href: "/examination",
+          label: "Examination",
+          icon: IconClipboardCheck,
+          active: pathname.startsWith("/examination"),
         },
       ],
     },

@@ -8,6 +8,7 @@ import { fetchDepartments } from "./lib/action";
 import { getCoursesByDepartment } from "./query/get-courses-by-department";
 import { getDepartment } from "./query/get-all-department";
 import { DepartmentContent } from "./_components/department-content";
+import { ContentLayout } from "@/components/content-layout";
 
 export default async function DepartmentPage() {
   const queryClient = new QueryClient();
@@ -26,8 +27,10 @@ export default async function DepartmentPage() {
   }
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <DepartmentContent />
-    </HydrationBoundary>
+    <ContentLayout title="Departments">
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <DepartmentContent />
+      </HydrationBoundary>
+    </ContentLayout>
   );
 }

@@ -1,3 +1,9 @@
+import { ContentLayout } from "@/components/content-layout";
+
 export default async function AdmissionPage() {
-  return <>This is Admission page where all the admission card will be shown</>;
+  return (
+    <ContentLayout title="Admissions">
+      This is Admission page where all the admission card will be shown
+    </ContentLayout>
+  );
 }
