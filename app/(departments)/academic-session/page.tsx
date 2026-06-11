@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { SessionTabsTable } from "./_components/session-tabs-table";
 import { getAcademicSessionsQuery } from "./query/get-academic-session";
+import { ContentLayout } from "@/components/content-layout";
 
 export default async function AcademicSessionPage() {
   const queryClient = new QueryClient();
@@ -12,8 +13,8 @@ export default async function AcademicSessionPage() {
   await queryClient.prefetchQuery(getAcademicSessionsQuery());
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <main className="flex flex-col gap-4 p-4">
+    <ContentLayout title="Academic Session">
+      <HydrationBoundary state={dehydrate(queryClient)}>
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold">Academic Sessions</h1>
           <p className="text-sm text-muted-foreground">
@@ -21,7 +22,8 @@ export default async function AcademicSessionPage() {
           </p>
         </div>
         <SessionTabsTable />
-      </main>
-    </HydrationBoundary>
+      </HydrationBoundary>
+    </ContentLayout>
+
   );
 }
