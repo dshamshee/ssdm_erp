@@ -375,6 +375,38 @@ export default async function PrintApplicationPage({ searchParams }: PageProps) 
           </table>
         </div>
 
+        {/* 5. Student Portal Login Credentials */}
+        <div className="space-y-3">
+          <h3 className="font-bold text-sm text-slate-900 uppercase border-b border-slate-200 pb-1">
+            5. Student Portal Login Credentials
+          </h3>
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-5 bg-amber-50/40">
+            <p className="text-[10px] text-slate-500 font-semibold mb-3 leading-relaxed">
+              Use the credentials below to access the Student Portal. Please change your password after your first login.
+            </p>
+            <div className="grid grid-cols-2 gap-6 text-xs font-sans">
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">User ID</span>
+                <p className="font-mono font-black text-slate-900 mt-0.5 text-sm tracking-wide bg-white border border-slate-200 rounded-lg px-3 py-1.5 inline-block">
+                  {student.UAN}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold text-[10px] uppercase">Default Password</span>
+                <p className="font-semibold text-slate-700 mt-1 text-[11px] leading-relaxed">
+                  Your password is: <span className="font-black text-slate-900">First 3 letters of your name (lowercase)</span> + <span className="font-black text-slate-900">Last 5 digits of your Aadhar number</span>
+                </p>
+                <p className="text-[10px] text-slate-500 mt-1.5 italic">
+                  Example: If name is <span className="font-bold not-italic">Rahul Kumar</span> and Aadhar is <span className="font-mono font-bold not-italic">9876 5432 1098</span>, then password = <span className="font-mono font-bold not-italic bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">rah21098</span>
+                </p>
+              </div>
+            </div>
+            <p className="text-[9px] text-red-500 font-bold mt-3 uppercase tracking-wider font-sans">
+              ⚠ Keep your login credentials confidential. Do not share your password with anyone.
+            </p>
+          </div>
+        </div>
+
         {/* Declarations & Signatures */}
         <div className="space-y-6 pt-6 border-t border-slate-200">
           <div className="space-y-2 text-[10px] text-slate-500 leading-relaxed font-sans">
