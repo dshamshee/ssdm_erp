@@ -23,21 +23,29 @@ export const VerificationCard = ({ batchId }: { batchId: string }) => {
 
   const [uan, setUan] = useState("");
   const [mjc, setMjc] = useState("");
-  const { mutate, isPending, isSuccess, isError, error } = useMutation({
+  const { mutate, isPending, isSuccess, isError, error, data } = useMutation({
     ...verifyEnrolledStudentMutationOptions(batchId),
   });
 
-  const onSubmit = (data: VerifyStudentUANType) => {
-    setUan(data.uan);
-    setMjc(data.subMJC);
-    mutate({ UAN: data.uan, MJC: data.subMJC });
+  const onSubmit = (formData: VerifyStudentUANType) => {
+    setUan(formData.uan);
+    setMjc(formData.subMJC);
+    mutate({ UAN: formData.uan, MJC: formData.subMJC });
   };
 
   useEffect(() => {
-    if (isSuccess) {
-      router.push(`/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`);
+    if (isSuccess && data) {
+      if (data.isPendingPayment) {
+        router.push(
+          `/admission/payment?batch=${batchId}&uan=${uan}&studentId=${data.studentId}`,
+        );
+      } else {
+        router.push(
+          `/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`,
+        );
+      }
     }
-  }, [isSuccess, router, batchId, uan, mjc]);
+  }, [isSuccess, data, router, batchId, uan, mjc]);
 
   return (
     <Card className="max-w-[600px] mx-auto w-full">

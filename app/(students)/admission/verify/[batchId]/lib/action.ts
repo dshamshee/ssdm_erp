@@ -1,7 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { EnrolledStudentTable, subjectTable } from "@/lib/db/schema";
+import {
+  EnrolledStudentTable,
+  subjectTable,
+  AdmittedStudentTable,
+  StudentFeePaymentTable,
+} from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export const fetchEnrolledStudent = async ({
@@ -14,6 +19,39 @@ export const fetchEnrolledStudent = async ({
   MJC: string;
 }) => {
   try {
+    // 1. Check if they have already registered (admitted)
+    const admittedStudent = await db.query.AdmittedStudentTable.findFirst({
+      where: eq(AdmittedStudentTable.UAN, UAN),
+    });
+
+    if (admittedStudent) {
+      // Check if they have completed payment
+      const payment = await db.query.StudentFeePaymentTable.findFirst({
+        where: and(
+          eq(StudentFeePaymentTable.studentId, admittedStudent.id),
+          eq(StudentFeePaymentTable.semesterCount, 1),
+          eq(StudentFeePaymentTable.status, "Success"),
+        ),
+      });
+
+      if (payment) {
+        return {
+          success: false,
+          message:
+            "You have already registered and completed your admission payment.",
+        };
+      } else {
+        // Registered but payment is pending/failed
+        return {
+          success: true,
+          verification: true,
+          isPendingPayment: true,
+          studentId: admittedStudent.id,
+        };
+      }
+    }
+
+    // 2. Otherwise verify enrolled student
     const student = await db.query.EnrolledStudentTable.findFirst({
       where: and(
         eq(EnrolledStudentTable.batchId, batchId),
@@ -26,7 +64,7 @@ export const fetchEnrolledStudent = async ({
       return { success: false, message: "Student Not Found" };
     }
 
-    return { success: true, verification: true };
+    return { success: true, verification: true, isPendingPayment: false };
   } catch (error) {
     return {
       success: false,
