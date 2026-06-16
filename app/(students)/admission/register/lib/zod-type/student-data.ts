@@ -40,11 +40,11 @@ export const studentDataZodSchema = z.object({
   batch: z.string().min(1, "Batch is required"),
   currentSemesterCount: z.number().int().positive(),
   subMJC: z.string().min(1, "Major Subject (MJC) is required"),
-  subMIC: z.array(z.string()),
-  subMDC: z.array(z.string()),
-  subAEC: z.array(z.string()),
-  subSEC: z.array(z.string()),
-  subVAC: z.array(z.string()),
+  subMIC: z.array(z.string()).min(1, "Minor Subject (MIC) is required"),
+  subMDC: z.array(z.string()).min(1, "Multidisciplinary Course (MDC) is required"),
+  subAEC: z.array(z.string()).min(1, "Ability Enhancement Course (AEC) is required"),
+  subSEC: z.array(z.string()).min(1, "Skill Enhancement Course (SEC) is required"),
+  subVAC: z.array(z.string()).min(1, "Value Added Course (VAC) is required"),
 });
 
 export type StudentDataType = z.infer<typeof studentDataZodSchema>;

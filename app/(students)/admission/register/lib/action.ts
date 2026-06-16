@@ -313,3 +313,20 @@ export async function registerStudent(payload: RegisterStudentPayload) {
     };
   }
 }
+
+export const fetchActiveSubjects = async () => {
+  try {
+    const subjects = await db.query.subjectTable.findMany({
+      where: eq(subjectTable.isActive, true),
+      orderBy: (subjects, { asc }) => [asc(subjects.name)],
+    });
+    return {
+      success: true as const,
+      subjects: subjects.map((s) => ({ id: s.id, name: s.name, code: s.code })),
+    };
+  } catch (error) {
+    console.error("[fetchActiveSubjects] Error:", error);
+    return { success: false as const, message: "Failed to fetch subjects" };
+  }
+};
+

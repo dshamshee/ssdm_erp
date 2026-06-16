@@ -66,7 +66,7 @@ export const subjectTable = pgTable(
     // ),
     check(
       "category_check",
-      sql`${table.category} IN ('SCIENCE', 'COMMERCE', 'ARTS')`,
+      sql`${table.category} IN ('SCIENCE', 'COMMERCE', 'ARTS', 'GENERAL')`,
     ),
   ],
 );

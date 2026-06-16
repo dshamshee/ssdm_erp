@@ -111,8 +111,10 @@ function FieldLabel({
       )}
       {...props}
     >
-      {props.children}
-      {required && <span className="text-destructive">*</span>}
+      <span>
+        {props.children}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </span>
     </Label>
   );
 }

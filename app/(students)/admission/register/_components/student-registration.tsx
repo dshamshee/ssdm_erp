@@ -222,7 +222,7 @@ export const StudentRegistration = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-full mx-auto py-10 px-2 sm:px-4 space-y-10">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
           Student Admission Registration
