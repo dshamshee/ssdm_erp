@@ -1,12 +1,10 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { signIn } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SigninSchema, signinSchema } from "../lib/zod-type/signin-type";
-import { InputForSignin } from "./Input-for-signin";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { LoadingSwap } from "@/components/ui/loading-swap";
 import {
   Card,
   CardContent,
@@ -14,10 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { getStudentRedirectInfo } from "@/app/auth/signin/lib/action";
-
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { signIn } from "@/lib/auth-client";
+import { type SigninSchema, signinSchema } from "../lib/zod-type/signin-type";
+import { InputForSignin } from "./Input-for-signin";
 export function MainSigninForm() {
   const router = useRouter();
   const [errorMsg, setErrorMsg] = useState("");
@@ -52,14 +50,7 @@ export function MainSigninForm() {
     const userRole = authData?.user?.role;
 
     if (userRole === "student") {
-      const info = await getStudentRedirectInfo(rawIdentifier);
-      if (info.success && info.data) {
-        router.push(
-          `/admission/register?batch=${info.data.batchId}&uan=${info.data.uan}&mjc=${info.data.mjc}`,
-        );
-      } else {
-        router.push("/");
-      }
+      router.push("/student/dashboard");
     } else if (userRole === "admin" || userRole === "superAdmin") {
       router.push("/department");
     } else {
