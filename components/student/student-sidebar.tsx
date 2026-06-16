@@ -2,8 +2,8 @@
 
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { StudentMenu } from "@/components/student/student-menu";
 import { SidebarToggle } from "@/components/sidebar-toggle";
+import { StudentMenu } from "@/components/student/student-menu";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
@@ -11,7 +11,9 @@ import { cn } from "@/lib/utils";
 
 export function StudentSidebar() {
   const sidebar = useStore(useSidebar, (x) => x);
-  if (!sidebar) return null;
+  if (!sidebar) {
+    return null;
+  }
   const { isOpen, toggleOpen, getOpenState, setIsHover, settings } = sidebar;
   return (
     <aside
@@ -22,6 +24,7 @@ export function StudentSidebar() {
       )}
     >
       <SidebarToggle isOpen={isOpen} setIsOpen={toggleOpen} />
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
       <div
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}

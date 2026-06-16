@@ -12,7 +12,7 @@ export default function StudentPanelLayout({
   children: React.ReactNode;
 }) {
   const sidebar = useStore(useSidebar, (x) => x);
-  if (!sidebar) return null;
+  if (!sidebar) { return null; }
   const { getOpenState, settings } = sidebar;
   return (
     <>
