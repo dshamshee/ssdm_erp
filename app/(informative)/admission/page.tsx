@@ -43,7 +43,13 @@ async function getOpenAdmissions() {
         eq(batchTable.academicSessionId, academicSessionTable.id),
       )
       .where(eq(batchTable.isActive, true));
-    return records;
+
+    const todayStr = new Date().toISOString().split("T")[0];
+    return records.filter((r) => {
+      const actualEndDate =
+        r.isDateExtended && r.extendedDate ? r.extendedDate : r.endDate;
+      return todayStr >= r.startDate && todayStr <= actualEndDate;
+    });
   } catch (error) {
     console.error("Error fetching open admissions:", error);
     return [];

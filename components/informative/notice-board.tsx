@@ -8,10 +8,11 @@ import {
   ArrowRight,
   FileText,
   Bookmark,
-  Clock,
+  ExternalLink,
 } from "lucide-react";
+import type { tenderTable } from "@/lib/db/schema";
 
-type TabKey = "notice" | "admission" | "examination";
+type TabKey = "notice" | "tender" | "examination";
 
 interface OpenAdmission {
   batchId: string;
@@ -22,54 +23,22 @@ interface OpenAdmission {
   endDate: string;
 }
 
-// Static placeholder notices
-const staticNotices = [
-  {
-    title: "Revised Academic Calendar 2025-2026 published",
-    date: "05 Jun 2026",
-    category: "notice" as const,
-  },
-  {
-    title: "NCC / NSS Enrollment Drive 2026-27 — Register Now",
-    date: "01 Jun 2026",
-    category: "notice" as const,
-  },
-  {
-    title:
-      "National Seminar on Innovation in Higher Education — Call for Papers",
-    date: "24 May 2026",
-    category: "notice" as const,
-  },
-];
-
-const staticExam = [
-  {
-    title: "Semester-II Exam Form Fill-up — Last Date Extended",
-    date: "08 Jun 2026",
-    category: "examination" as const,
-  },
-  {
-    title: "B.Sc (Hons) Sem-IV Practical Exam Schedule Released",
-    date: "02 Jun 2026",
-    category: "examination" as const,
-  },
-  {
-    title: "Scrutiny Results for B.A. Semester-IV Published",
-    date: "28 May 2026",
-    category: "examination" as const,
-  },
-];
+type Tender = typeof tenderTable.$inferSelect;
 
 export function NoticeBoard({
   openAdmissions,
+  tenders,
 }: {
   openAdmissions: OpenAdmission[];
+  tenders: Tender[];
 }) {
   const [tab, setTab] = useState<TabKey>("notice");
 
+  // Notice tab shows admission notices
   const admissionNotices = openAdmissions.map((a) => ({
-    title: `Admission open: ${a.courseName} (${a.sessionName}) — Apply before ${new Date(a.endDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`,
-    date: new Date().toLocaleDateString("en-IN", {
+    title: `Admission Open: ${a.courseName} (${a.sessionName})`,
+    description: `Apply before ${new Date(a.endDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}.`,
+    date: new Date(a.startDate).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -79,21 +48,51 @@ export function NoticeBoard({
     isNew: true,
   }));
 
+  // Tender tab shows tenders
+  const tenderNotices = tenders.map((t) => ({
+    title: t.title,
+    description: t.description || "",
+    date: new Date(t.startDate).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }),
+    category: "tender" as const,
+    link: t.document,
+    isNew:
+      new Date(t.startDate) > new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+  }));
+
+  // Examination tab is empty for now
+  const examinationNotices: any[] = [];
+
   const items =
     tab === "notice"
-      ? staticNotices
-      : tab === "examination"
-        ? staticExam
-        : admissionNotices;
+      ? admissionNotices
+      : tab === "tender"
+        ? tenderNotices
+        : examinationNotices;
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: "notice", label: "Notice" },
     {
-      key: "admission",
-      label: `Admission${openAdmissions.length ? ` (${openAdmissions.length})` : ""}`,
+      key: "notice",
+      label: `Notice${openAdmissions.length ? ` (${openAdmissions.length})` : ""}`,
+    },
+    {
+      key: "tender",
+      label: `Tender${tenders.length ? ` (${tenders.length})` : ""}`,
     },
     { key: "examination", label: "Examination" },
   ];
+
+  const isExternal = (href: string) => {
+    return (
+      href.startsWith("http") ||
+      href.endsWith(".pdf") ||
+      href.startsWith("/uploads") ||
+      href.includes("/tenders/")
+    );
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden h-full flex flex-col">
@@ -136,52 +135,68 @@ export function NoticeBoard({
                 className={`p-2 rounded-lg shrink-0 mt-0.5 ${
                   item.category === "admission"
                     ? "bg-emerald-50 text-emerald-600"
-                    : item.category === "examination"
-                      ? "bg-amber-50 text-amber-600"
+                    : item.category === "tender"
+                      ? "bg-purple-50 text-purple-600"
                       : "bg-blue-50 text-blue-600"
                 }`}
               >
                 {item.category === "admission" ? (
                   <Bookmark className="h-3.5 w-3.5" />
-                ) : item.category === "examination" ? (
-                  <Clock className="h-3.5 w-3.5" />
-                ) : (
+                ) : item.category === "tender" ? (
                   <FileText className="h-3.5 w-3.5" />
+                ) : (
+                  <Bell className="h-3.5 w-3.5" />
                 )}
               </div>
-              <div className="space-y-1 min-w-0">
+              <div className="space-y-1 min-w-0 flex-1">
                 <p className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
                   <Calendar className="h-3 w-3" /> {item.date}
-                  {"isNew" in item && item.isNew && (
+                  {item.isNew && (
                     <span className="bg-red-500 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full uppercase animate-pulse">
                       New
                     </span>
                   )}
                 </p>
-                {"link" in item ? (
-                  <Link
-                    href={item.link as string}
-                    className="text-xs font-semibold text-slate-800 hover:text-blue-900 leading-snug block"
-                  >
-                    {item.title}
-                  </Link>
-                ) : (
-                  <p className="text-xs font-semibold text-slate-800 leading-snug">
-                    {item.title}
-                  </p>
-                )}
+                <div className="space-y-0.5">
+                  {isExternal(item.link) ? (
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-slate-800 hover:text-blue-900 leading-snug flex items-center gap-1.5"
+                    >
+                      {item.title}
+                      <ExternalLink className="h-3 w-3 text-slate-400 inline shrink-0" />
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.link}
+                      className="text-xs font-semibold text-slate-800 hover:text-blue-900 leading-snug block"
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+                  {item.description && (
+                    <p className="text-[11px] text-slate-500 font-normal leading-relaxed line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="p-8 text-center text-sm text-slate-400">
-            No updates in this category.
+          <div className="p-8 text-center text-xs text-slate-400">
+            {tab === "notice" && "No active admission notices at the moment."}
+            {tab === "tender" && "No active tender publications at the moment."}
+            {tab === "examination" &&
+              "No active examination notices or links at the moment."}
           </div>
         )}
       </div>
 
-      {/* View all */}
-      {tab === "admission" && openAdmissions.length > 0 && (
+      {/* View all button for notices / admissions */}
+      {tab === "notice" && openAdmissions.length > 0 && (
         <div className="border-t border-slate-100 px-5 py-3 bg-slate-50/50">
           <Link
             href="/admission"

@@ -53,6 +53,8 @@ export const EnrolledStudentTable = pgTable(
     batchId: varchar({ length: 128 })
       .references(() => batchTable.id, { onDelete: "cascade" })
       .notNull(),
+    isSubmitted: boolean().default(false),
+    isFeePaid: boolean().default(false),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
   },

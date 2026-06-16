@@ -30,7 +30,7 @@ export default async function RegisterStudents({ searchParams }: PageProps) {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-blue-900 selection:text-white">
       <SiteHeader collegeName={config.name} />
       <main className="flex-grow py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[95%] mx-auto px-2 sm:px-4">
           <HydrationBoundary state={dehydrate(queryClient)}>
             {/* <Register /> */}
             <StudentRegistration />

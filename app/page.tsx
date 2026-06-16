@@ -4,8 +4,9 @@ import {
   batchTable,
   courseTable,
   academicSessionTable,
+  tenderTable,
 } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { getCollegeConfig } from "@/lib/college-config";
 import { SiteHeader } from "@/components/informative/site-header";
 import { SiteFooter } from "@/components/informative/site-footer";
@@ -40,6 +41,8 @@ async function getOpenAdmissions() {
         sessionName: academicSessionTable.name,
         startDate: admissionOpenTable.startDate,
         endDate: admissionOpenTable.endDate,
+        isDateExtended: admissionOpenTable.isDateExtended,
+        extendedDate: admissionOpenTable.extendedDate,
       })
       .from(admissionOpenTable)
       .innerJoin(batchTable, eq(admissionOpenTable.batchId, batchTable.id))
@@ -49,9 +52,28 @@ async function getOpenAdmissions() {
         eq(batchTable.academicSessionId, academicSessionTable.id),
       )
       .where(eq(batchTable.isActive, true));
-    return records;
+
+    const todayStr = new Date().toISOString().split("T")[0];
+    return records.filter((r) => {
+      const actualEndDate =
+        r.isDateExtended && r.extendedDate ? r.extendedDate : r.endDate;
+      return todayStr >= r.startDate && todayStr <= actualEndDate;
+    });
   } catch (error) {
     console.error("Error fetching open admissions:", error);
+    return [];
+  }
+}
+
+async function getTenders() {
+  try {
+    const records = await db
+      .select()
+      .from(tenderTable)
+      .orderBy(desc(tenderTable.startDate));
+    return records;
+  } catch (error) {
+    console.error("Error fetching tenders:", error);
     return [];
   }
 }
@@ -59,6 +81,7 @@ async function getOpenAdmissions() {
 export default async function Page() {
   const config = getCollegeConfig();
   const openAdmissions = await getOpenAdmissions();
+  const tenders = await getTenders();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-blue-900 selection:text-white">
@@ -168,7 +191,10 @@ export default async function Page() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
               {/* Notice Board Column (Spans 2 on lg) */}
               <div className="lg:col-span-2">
-                <NoticeBoard openAdmissions={openAdmissions} />
+                <NoticeBoard
+                  openAdmissions={openAdmissions}
+                  tenders={tenders}
+                />
               </div>
 
               {/* Quick Links Column */}

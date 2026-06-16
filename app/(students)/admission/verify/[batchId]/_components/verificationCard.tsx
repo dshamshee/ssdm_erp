@@ -1,17 +1,17 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type VerifyStudentUANType,
   verifyStudentUANZodSchema,
 } from "../lib/zod-type/verify-student-uan";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { InputForVerification } from "./input-for-verification";
-import { useMutation } from "@tanstack/react-query";
 import { verifyEnrolledStudentMutationOptions } from "../query/verify-enrolled-student";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { InputForVerification } from "./input-for-verification";
 
 export const VerificationCard = ({ batchId }: { batchId: string }) => {
   const router = useRouter();
@@ -20,22 +20,40 @@ export const VerificationCard = ({ batchId }: { batchId: string }) => {
     defaultValues: { uan: "", subMJC: "" },
   });
 
-  const { mutate, isPending, isSuccess, isError, error } = useMutation({
+  const [uan, setUan] = useState("");
+  const [mjc, setMjc] = useState("");
+  const { mutate, isPending, isSuccess, isError, error, data } = useMutation({
     ...verifyEnrolledStudentMutationOptions(batchId),
     onSuccess: (data) => {
       // Verification successful — redirect to registration form
-      if (!data.student) return;
+      if (!data.student) {
+        return;
+      }
       const uan = data.student.UAN;
       const mjc = data.student.MJC;
-      router.push(
-        `/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`,
-      );
+      router.push(`/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`);
     },
   });
 
-  const onSubmit = (data: VerifyStudentUANType) => {
-    mutate({ UAN: data.uan, MJC: data.subMJC });
+  const onSubmit = (formData: VerifyStudentUANType) => {
+    setUan(formData.uan);
+    setMjc(formData.subMJC);
+    mutate({ UAN: formData.uan, MJC: formData.subMJC });
   };
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      if (data.isPendingPayment) {
+        router.push(
+          `/admission/payment?batch=${batchId}&uan=${uan}&studentId=${data.studentId}`,
+        );
+      } else {
+        router.push(
+          `/admission/register?batch=${batchId}&uan=${uan}&mjc=${mjc}`,
+        );
+      }
+    }
+  }, [isSuccess, data, router, batchId, uan, mjc]);
 
   return (
     <Card className="max-w-[600px] mx-auto w-full">

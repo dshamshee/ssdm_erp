@@ -66,7 +66,7 @@ export const subjectTable = pgTable(
     // ),
     check(
       "category_check",
-      sql`${table.category} IN ('SCIENCE', 'COMMERCE', 'ARTS')`,
+      sql`${table.category} IN ('SCIENCE', 'COMMERCE', 'ARTS', 'GENERAL')`,
     ),
   ],
 );
@@ -126,6 +126,7 @@ export const admissionOpenTable = pgTable("admission_open", {
   startDate: date().notNull(),
   endDate: date().notNull(),
   lateFee: integer().default(0),
+  practicalFee: integer().default(500),
   isDateExtended: boolean().default(false),
   extendedDate: date(), // This field is optional (you can also extend the endDate otherwise set the new date in it)
   createdAt: timestamp().defaultNow().notNull(),

@@ -1,23 +1,23 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  type AcademicDetailsType,
+  academicDetailsZodSchema,
+  type DocumentsUploadType,
+  documentsUploadZodSchema,
+  type StudentDataType,
+  studentDataZodSchema,
+} from "../lib/zod-type/student-data";
+import { useMutRegisterStudent } from "../query/mut-register-student";
+import { DocumentsUploadForm } from "./documents-upload-form";
 import { PersonalDetailsForm } from "./personal-details-form";
 import { PreviousAcademicDetailsForm } from "./previous-academic-details-form";
-import { DocumentsUploadForm } from "./documents-upload-form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  studentDataZodSchema,
-  StudentDataType,
-  academicDetailsZodSchema,
-  AcademicDetailsType,
-  documentsUploadZodSchema,
-  DocumentsUploadType,
-} from "../lib/zod-type/student-data";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useMutRegisterStudent } from "../query/mut-register-student";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 export const StudentRegistration = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -214,7 +214,7 @@ export const StudentRegistration = () => {
         onSuccess: (data) => {
           const hasPractical = data?.hasPractical ?? false;
           router.push(
-            `/admission/payment?batch=${personalValues.batch}&practical=${hasPractical}&studentId=${data.id}`,
+            `/admission/payment?batch=${personalValues.batch}&practical=${hasPractical}&uan=${personalValues.UAN}&studentId=${data.id}`,
           );
         },
       },
@@ -222,7 +222,7 @@ export const StudentRegistration = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-full mx-auto py-10 px-2 sm:px-4 space-y-10">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
           Student Admission Registration

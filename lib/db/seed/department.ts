@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { db } from "@/lib/db";
 import {
   academicSessionTable,
@@ -7,6 +6,7 @@ import {
   courseTable,
   batchTable,
   admissionOpenTable,
+  tenderTable,
 } from "@/lib/db/schema";
 
 const NUM_RECORDS = 5;
@@ -16,6 +16,7 @@ async function main() {
   try {
     // Clear existing data to prevent unique constraint errors
     await db.delete(admissionOpenTable);
+    await db.delete(tenderTable);
     await db.delete(batchTable);
     await db.delete(courseTable);
     await db.delete(subjectTable);
@@ -23,8 +24,9 @@ async function main() {
     await db.delete(academicSessionTable);
 
     // 1. Seed Academic Sessions
+    const currentYear = new Date().getFullYear();
     const sessions = Array.from({ length: NUM_RECORDS }).map((_, i) => {
-      const startYear = 2020 + i;
+      const startYear = currentYear - NUM_RECORDS + 1 + i;
       const endYear = startYear + 4;
       return {
         name: `${startYear}-${endYear}`,
@@ -98,8 +100,8 @@ async function main() {
 
     const admissionOpenRecords = batchesForAdmission.map((batch) => ({
       batchId: batch.id,
-      startDate: "2024-06-01",
-      endDate: "2024-07-31",
+      startDate: `${currentYear}-06-01`,
+      endDate: `${currentYear}-07-31`,
       lateFee: 500,
       isDateExtended: false,
     }));
@@ -130,6 +132,38 @@ async function main() {
 
     await db.insert(subjectTable).values(subjectsToInsert);
     console.log(`✅ Seeded ${subjectsToInsert.length} subjects.`);
+
+    // 6. Seed Tenders
+    const tenders = [
+      {
+        title: "Tender for Construction of New Central Library Building",
+        description:
+          "Sealed percentage rate tenders are invited from experienced and registered contractors of appropriate class.",
+        startDate: `${currentYear}-06-01`,
+        endDate: `${currentYear}-07-15`,
+        document: "/tenders/library-construction.pdf",
+      },
+      {
+        title:
+          "Tender for Supply of Laboratory Instruments (Physics & Chemistry)",
+        description:
+          "Bids are invited for the supply, installation, testing and commissioning of laboratory equipments.",
+        startDate: `${currentYear}-06-05`,
+        endDate: `${currentYear}-06-30`,
+        document: "/tenders/lab-instruments.pdf",
+      },
+      {
+        title: "Tender for College Wi-Fi Networking & CCTV Installation",
+        description:
+          "Installation of high-speed Wi-Fi access points and CCTV security network across the campus.",
+        startDate: `${currentYear}-06-08`,
+        endDate: `${currentYear}-06-28`,
+        document: "/tenders/wifi-cctv-setup.pdf",
+      },
+    ];
+
+    await db.insert(tenderTable).values(tenders);
+    console.log(`✅ Seeded ${tenders.length} tenders.`);
 
     console.log(`🎉 Successfully seeded master tables!`);
     process.exit(0);

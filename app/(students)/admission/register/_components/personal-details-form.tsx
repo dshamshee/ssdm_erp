@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getEnrolledStudent } from "../query/get-enrolled-student";
+import { fetchActiveSubjects } from "../lib/action";
 import { useEffect, useState } from "react";
 import {
   User,
@@ -45,6 +46,17 @@ export const PersonalDetailsForm = ({
   const { data, isLoading, error } = useQuery({
     ...getEnrolledStudent({ batch: batch!, UAN: UAN!, MJC: MJC! }),
     enabled: !!batch && !!UAN && !!MJC,
+  });
+
+  const { data: subjects = [], isLoading: isLoadingSubjects } = useQuery({
+    queryKey: ["active_subjects"],
+    queryFn: async () => {
+      const res = await fetchActiveSubjects();
+      if (!res.success) {
+        throw new Error(res.message);
+      }
+      return res.subjects || [];
+    },
   });
 
   useEffect(() => {
@@ -845,6 +857,185 @@ export const PersonalDetailsForm = ({
                           }`}
                         />
                       </button>
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Group C: Academic Subject Selection */}
+          <div className="space-y-6 pt-6 border-t border-muted-foreground/10">
+            <div className="flex items-center gap-2 border-b border-primary/10 pb-2">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <h3 className="text-base font-bold text-foreground">
+                Academic Subject Selection
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Please select your subjects for the academic session. Major Subject (MJC) is pre-defined from enrollment.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+              {/* Minor Subject (MIC) */}
+              <Controller
+                control={form.control}
+                name="subMIC"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="min-w-0">
+                    <FieldLabel required>Minor Subject (MIC)</FieldLabel>
+                    <FieldContent>
+                      <select
+                        value={field.value?.[0] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val ? [val] : []);
+                        }}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoadingSubjects}
+                        className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                      >
+                        <option value="">
+                          {isLoadingSubjects ? "Loading subjects..." : "Select Minor Subject (MIC)"}
+                        </option>
+                        {subjects.map((subj) => (
+                          <option key={subj.id} value={subj.id}>
+                            {subj.name} ({subj.code})
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+
+              {/* Multidisciplinary Course (MDC) */}
+              <Controller
+                control={form.control}
+                name="subMDC"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="min-w-0">
+                    <FieldLabel required>Multidisciplinary Course (MDC)</FieldLabel>
+                    <FieldContent>
+                      <select
+                        value={field.value?.[0] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val ? [val] : []);
+                        }}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoadingSubjects}
+                        className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                      >
+                        <option value="">
+                          {isLoadingSubjects ? "Loading subjects..." : "Select Multidisciplinary Course (MDC)"}
+                        </option>
+                        {subjects.map((subj) => (
+                          <option key={subj.id} value={subj.id}>
+                            {subj.name} ({subj.code})
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+
+              {/* Ability Enhancement Course (AEC) */}
+              <Controller
+                control={form.control}
+                name="subAEC"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="min-w-0">
+                    <FieldLabel required>Ability Enhancement Course (AEC)</FieldLabel>
+                    <FieldContent>
+                      <select
+                        value={field.value?.[0] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val ? [val] : []);
+                        }}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoadingSubjects}
+                        className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                      >
+                        <option value="">
+                          {isLoadingSubjects ? "Loading subjects..." : "Select Ability Enhancement Course (AEC)"}
+                        </option>
+                        {subjects.map((subj) => (
+                          <option key={subj.id} value={subj.id}>
+                            {subj.name} ({subj.code})
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+
+              {/* Skill Enhancement Course (SEC) */}
+              <Controller
+                control={form.control}
+                name="subSEC"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="min-w-0">
+                    <FieldLabel required>Skill Enhancement Course (SEC)</FieldLabel>
+                    <FieldContent>
+                      <select
+                        value={field.value?.[0] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val ? [val] : []);
+                        }}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoadingSubjects}
+                        className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                      >
+                        <option value="">
+                          {isLoadingSubjects ? "Loading subjects..." : "Select Skill Enhancement Course (SEC)"}
+                        </option>
+                        {subjects.map((subj) => (
+                          <option key={subj.id} value={subj.id}>
+                            {subj.name} ({subj.code})
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+
+              {/* Value Added Course (VAC) */}
+              <Controller
+                control={form.control}
+                name="subVAC"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="min-w-0">
+                    <FieldLabel required>Value Added Course (VAC)</FieldLabel>
+                    <FieldContent>
+                      <select
+                        value={field.value?.[0] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val ? [val] : []);
+                        }}
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoadingSubjects}
+                        className="h-9 w-full min-w-0 rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 md:text-sm cursor-pointer"
+                      >
+                        <option value="">
+                          {isLoadingSubjects ? "Loading subjects..." : "Select Value Added Course (VAC)"}
+                        </option>
+                        {subjects.map((subj) => (
+                          <option key={subj.id} value={subj.id}>
+                            {subj.name} ({subj.code})
+                          </option>
+                        ))}
+                      </select>
                       <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
