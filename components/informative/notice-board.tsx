@@ -10,7 +10,7 @@ import {
   Bookmark,
   ExternalLink,
 } from "lucide-react";
-import type { tenderTable } from "@/lib/db/schema";
+import type { tenderTable, notice } from "@/lib/db/schema";
 
 type TabKey = "notice" | "tender" | "examination";
 
@@ -24,13 +24,16 @@ interface OpenAdmission {
 }
 
 type Tender = typeof tenderTable.$inferSelect;
+type Notice = typeof notice.$inferSelect;
 
 export function NoticeBoard({
   openAdmissions,
   tenders,
+  notices,
 }: {
   openAdmissions: OpenAdmission[];
   tenders: Tender[];
+  notices: Notice[];
 }) {
   const [tab, setTab] = useState<TabKey>("notice");
 
@@ -43,10 +46,32 @@ export function NoticeBoard({
       month: "short",
       year: "numeric",
     }),
+    rawDate: new Date(a.startDate),
     category: "admission" as const,
     link: `/admission/verify/${a.batchId}`,
     isNew: true,
   }));
+
+  // Notice tab also shows college notices
+  const collegeNotices = (notices || []).map((n) => ({
+    title: n.title,
+    description: n.description || "",
+    date: new Date(n.startDate).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }),
+    rawDate: new Date(n.startDate),
+    category: "notice" as const,
+    link: n.file || "",
+    isNew:
+      new Date(n.startDate) > new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+  }));
+
+  // Combine and sort notices by start date descending
+  const combinedNotices = [...admissionNotices, ...collegeNotices].sort(
+    (a, b) => b.rawDate.getTime() - a.rawDate.getTime()
+  );
 
   // Tender tab shows tenders
   const tenderNotices = tenders.map((t) => ({
@@ -68,7 +93,7 @@ export function NoticeBoard({
 
   const items =
     tab === "notice"
-      ? admissionNotices
+      ? combinedNotices
       : tab === "tender"
         ? tenderNotices
         : examinationNotices;
@@ -76,7 +101,7 @@ export function NoticeBoard({
   const tabs: { key: TabKey; label: string }[] = [
     {
       key: "notice",
-      label: `Notice${openAdmissions.length ? ` (${openAdmissions.length})` : ""}`,
+      label: `Notice${combinedNotices.length ? ` (${combinedNotices.length})` : ""}`,
     },
     {
       key: "tender",
@@ -187,7 +212,7 @@ export function NoticeBoard({
           ))
         ) : (
           <div className="p-8 text-center text-xs text-slate-400">
-            {tab === "notice" && "No active admission notices at the moment."}
+            {tab === "notice" && "No active notices or admission announcements at the moment."}
             {tab === "tender" && "No active tender publications at the moment."}
             {tab === "examination" &&
               "No active examination notices or links at the moment."}

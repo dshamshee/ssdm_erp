@@ -7,6 +7,7 @@ import {
   IconHierarchy2,
   IconSchool,
   IconUserCheck,
+  IconBell,
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 
@@ -74,6 +75,12 @@ export function getMenuList(pathname: string): Group[] {
           label: "Tenders",
           icon: IconFileText,
           active: pathname.startsWith("/tender"),
+        },
+        {
+          href: "/notice",
+          label: "Notices",
+          icon: IconBell,
+          active: pathname.startsWith("/notice"),
         },
       ],
     },

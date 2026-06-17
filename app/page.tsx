@@ -5,6 +5,7 @@ import {
   courseTable,
   academicSessionTable,
   tenderTable,
+  notice,
 } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getCollegeConfig } from "@/lib/college-config";
@@ -78,10 +79,24 @@ async function getTenders() {
   }
 }
 
+async function getNotices() {
+  try {
+    const records = await db
+      .select()
+      .from(notice)
+      .orderBy(desc(notice.startDate));
+    return records;
+  } catch (error) {
+    console.error("Error fetching notices:", error);
+    return [];
+  }
+}
+
 export default async function Page() {
   const config = getCollegeConfig();
   const openAdmissions = await getOpenAdmissions();
   const tenders = await getTenders();
+  const notices = await getNotices();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-blue-900 selection:text-white">
@@ -194,6 +209,7 @@ export default async function Page() {
                 <NoticeBoard
                   openAdmissions={openAdmissions}
                   tenders={tenders}
+                  notices={notices}
                 />
               </div>
 
