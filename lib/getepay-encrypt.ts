@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 export class GcmPgEncryption {
   private iv: string;
@@ -9,10 +9,18 @@ export class GcmPgEncryption {
   constructor(iv: string, key: string, isProduction = false) {
     this.iv = iv;
     this.key = key;
-    this.isProduction = isProduction;
+
+    // Auto-detect sandbox URL to force GCM mode even if running in production environment
+    const getepayUrl = process.env.GETEPAY_URL || "";
+    const isSandboxUrl =
+      getepayUrl.includes("pay1.getepay.in") ||
+      getepayUrl.includes("uat") ||
+      getepayUrl.includes("sandbox");
+
+    this.isProduction = isProduction && !isSandboxUrl;
 
     // Handle case where IV might be Terminal ID (not Base64)
-    if (isProduction && !this._isValidBase64(iv)) {
+    if (this.isProduction && !this._isValidBase64(iv)) {
       console.log("⚠️  IV is not Base64, using MD5 hash of Terminal ID as IV");
       this.md5Iv = crypto.createHash("md5").update(iv).digest("hex");
     }
@@ -119,7 +127,13 @@ export class GcmPgEncryption {
     const salt = crypto.randomBytes(16);
     const iv = crypto.randomBytes(12);
 
-    const derivedKey = crypto.pbkdf2Sync(mKey, salt, Number(process.env.CRYPTO_CODE), 32, "sha512");
+    const derivedKey = crypto.pbkdf2Sync(
+      mKey,
+      salt,
+      Number(process.env.CRYPTO_CODE),
+      32,
+      "sha512",
+    );
 
     const cipher = crypto.createCipheriv("aes-256-gcm", derivedKey, iv);
     const encrypted = Buffer.concat([
@@ -143,7 +157,13 @@ export class GcmPgEncryption {
     const tag = data.subarray(data.length - 16);
     const encrypted = data.subarray(28, data.length - 16);
 
-    const derivedKey = crypto.pbkdf2Sync(mKey, salt, Number(process.env.CRYPTO_CODE), 32, "sha512");
+    const derivedKey = crypto.pbkdf2Sync(
+      mKey,
+      salt,
+      Number(process.env.CRYPTO_CODE),
+      32,
+      "sha512",
+    );
 
     const decipher = crypto.createDecipheriv("aes-256-gcm", derivedKey, iv);
     decipher.setAuthTag(tag);
