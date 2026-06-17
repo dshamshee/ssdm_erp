@@ -24,9 +24,12 @@ const publicRoutes = [
   "/",
   "/auth",
   "/api/auth",
+  "/api/upload",
+  "/api/payments",
   "/auth/signin",
   "/admission",
   "/examination",
+  "/payment-success",
 ];
 
 function isMatch(pathname: string, prefixes: string[]) {
