@@ -1,8 +1,8 @@
 "use client";
 
+import { GraduationCap, Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, GraduationCap, Phone } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -30,10 +30,10 @@ export function SiteHeader({ collegeName }: { collegeName: string }) {
             <span className="flex items-center gap-1">
               <Phone className="h-3 w-3" /> Helpline
             </span>
-            <Link href="/auth/student/signin" className="hover:underline font-medium">
+            <Link href="/auth/signin" className="hover:underline font-medium">
               Student Login
             </Link>
-            <Link href="/auth/admin/signin" className="hover:underline font-medium">
+            <Link href="/auth/signin" className="hover:underline font-medium">
               Staff Login
             </Link>
           </div>

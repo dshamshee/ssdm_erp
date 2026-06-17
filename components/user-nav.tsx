@@ -2,6 +2,7 @@
 
 import { LayoutGrid, LogOut, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +20,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { authClient, useSession } from "@/lib/auth-client";
 
 export function UserNav() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const user = session?.user;
+  const name = user?.name ?? "User";
+  const email = user?.email ?? "";
+  const image = user?.image;
+  const initials = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    router.push("/auth/signin");
+  }
+
   return (
     <DropdownMenu>
       <TooltipProvider disableHoverableContent>
@@ -32,8 +53,10 @@ export function UserNav() {
                 className="relative h-8 w-8 rounded-full"
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="#" alt="Avatar" />
-                  <AvatarFallback className="bg-transparent">JD</AvatarFallback>
+                  {image && <AvatarImage src={image} alt={name} />}
+                  <AvatarFallback className="bg-transparent">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -45,9 +68,9 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
+            <p className="text-sm font-medium leading-none">{name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              johndoe@example.com
+              {email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -67,7 +90,7 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => {}}>
+        <DropdownMenuItem className="hover:cursor-pointer" onClick={handleSignOut}>
           <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
           Sign out
         </DropdownMenuItem>
