@@ -105,9 +105,9 @@ export const documentsUploadZodSchema = z.object({
   domicile: documentFileSchema().optional(),
   income: documentFileSchema().optional(),
   pwd: documentFileSchema().optional(),
-  previousLC: documentFileSchema("Leaving Certificate is required"),
-  previousMigration: documentFileSchema("Migration Certificate is required"),
-  previousMarksheet: documentFileSchema("Previous Marksheet is required"),
+  previousLC: documentFileSchema().optional(),
+  previousMigration: documentFileSchema().optional(),
+  previousMarksheet: documentFileSchema().optional(),
   photo: documentFileSchema("Passport size photo is required"),
   signature: documentFileSchema("Signature is required"),
 });

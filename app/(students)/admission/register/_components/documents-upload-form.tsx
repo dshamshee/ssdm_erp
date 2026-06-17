@@ -193,24 +193,6 @@ export const DocumentsUploadForm = ({
               description="PDF, JPG, PNG up to 1MB"
               required
             />
-            <DocumentInputCard
-              name="previousMarksheet"
-              label="Previous Year Marksheet"
-              description="PDF, JPG, PNG up to 1MB"
-              required
-            />
-            <DocumentInputCard
-              name="previousLC"
-              label="College Leaving Certificate (CLC)"
-              description="PDF, JPG, PNG up to 1MB"
-              required
-            />
-            <DocumentInputCard
-              name="previousMigration"
-              label="Migration Certificate"
-              description="PDF, JPG, PNG up to 1MB"
-              required
-            />
           </div>
         </div>
 
@@ -219,11 +201,26 @@ export const DocumentsUploadForm = ({
           <div className="flex items-center gap-2 pb-2">
             <FileText className="h-4.5 w-4.5 text-chart-3" />
             <h3 className="text-base font-bold text-foreground">
-              Category-specific Documents (If Applicable)
+              Optional / Category-specific Documents
             </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <DocumentInputCard
+              name="previousMarksheet"
+              label="Previous Year Marksheet"
+              description="PDF, JPG, PNG up to 1MB"
+            />
+            <DocumentInputCard
+              name="previousLC"
+              label="College Leaving Certificate (CLC)"
+              description="PDF, JPG, PNG up to 1MB"
+            />
+            <DocumentInputCard
+              name="previousMigration"
+              label="Migration Certificate"
+              description="PDF, JPG, PNG up to 1MB"
+            />
             <DocumentInputCard
               name="cast"
               label="Caste Certificate"

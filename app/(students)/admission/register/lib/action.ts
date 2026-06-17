@@ -225,17 +225,26 @@ export async function registerStudent(payload: RegisterStudentPayload) {
       batch.academicSession?.name?.match(/\d{4}/)?.[0] ||
       new Date().getFullYear().toString();
 
-    // Count existing admitted students in this batch for sequential numbering
-    const [{ value: existingCount }] = await db
-      .select({ value: count() })
-      .from(AdmittedStudentTable)
-      .where(eq(AdmittedStudentTable.batchId, personal.batch));
-
-    const sequenceNumber = (existingCount + 1).toString().padStart(4, "0");
-    const collegeRoll = `${courseTypePrefix}${sessionYear}${sequenceNumber}`;
-
     // 3. Transaction: insert admitted student, academic record, and documents atomically
     const data = await db.transaction(async (tx) => {
+      // Generate collegeRoll inside transaction to be robust against concurrent insertions
+      const prefix = `${courseTypePrefix}${sessionYear}`;
+      const lastStudent = await tx.query.AdmittedStudentTable.findFirst({
+        where: sql`${AdmittedStudentTable.collegeRoll} LIKE ${prefix + "%"}`,
+        orderBy: (table, { desc }) => [desc(table.collegeRoll)],
+      });
+
+      let nextSequence = 1;
+      if (lastStudent) {
+        const lastSequenceStr = lastStudent.collegeRoll.substring(prefix.length);
+        const lastSequence = parseInt(lastSequenceStr, 10);
+        if (!isNaN(lastSequence)) {
+          nextSequence = lastSequence + 1;
+        }
+      }
+      const sequenceNumber = nextSequence.toString().padStart(4, "0");
+      const collegeRoll = `${prefix}${sequenceNumber}`;
+
       // 3a. Insert admitted student
       const [admittedStudent] = await tx
         .insert(AdmittedStudentTable)
@@ -327,9 +336,9 @@ export async function registerStudent(payload: RegisterStudentPayload) {
           domicile: documents.domicile || null,
           income: documents.income || null,
           pwd: documents.pwd || null,
-          previousLC: documents.previousLC,
-          previousMigration: documents.previousMigration,
-          previousMarksheet: documents.previousMarksheet,
+          previousLC: documents.previousLC || null,
+          previousMigration: documents.previousMigration || null,
+          previousMarksheet: documents.previousMarksheet || null,
           photo: documents.photo,
           signature: documents.signature,
         });
