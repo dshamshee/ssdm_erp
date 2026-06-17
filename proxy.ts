@@ -12,18 +12,22 @@ const adminRoutes = [
   "/academic-session",
   "/admission-open",
   "/tender",
-  "/admission",
-  "/examination",
 ];
 
 // Student-only route prefixes
 const studentRoutes = ["/student"];
 
-// Shared routes accessible by both admin and student (checked before admin guard)
-const sharedRoutes = ["/admission/print"];
-
 // Public routes that never need auth
-const publicRoutes = ["/", "/auth", "/api/auth", "/auth/signin"];
+// (students) group: /admission/*, /examination
+// (informative) group: /admission
+const publicRoutes = [
+  "/",
+  "/auth",
+  "/api/auth",
+  "/auth/signin",
+  "/admission",
+  "/examination",
+];
 
 function isMatch(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -46,11 +50,6 @@ export async function proxy(request: NextRequest) {
   }
 
   const role = session.user.role;
-
-  // ── Shared routes: any authenticated user (admin or student) ──
-  if (isMatch(pathname, sharedRoutes)) {
-    return NextResponse.next();
-  }
 
   // ── Admin routes: only superAdmin & admin allowed ─────────────
   if (isMatch(pathname, adminRoutes)) {
