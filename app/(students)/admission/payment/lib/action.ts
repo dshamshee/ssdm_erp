@@ -129,7 +129,7 @@ export async function getStudentPaymentDetails(params: {
     console.error("[getStudentPaymentDetails] Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Internal Server Error",
+      message: "Something went wrong while fetching payment details.",
     };
   }
 }
@@ -314,7 +314,7 @@ export async function initiatePayment(params: {
     console.error("[initiatePayment] Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Internal Server Error",
+      message: "Something went wrong while initiating payment.",
     };
   }
 }
@@ -380,7 +380,7 @@ export async function simulateCallback(params: {
     console.error("[simulateCallback] Error:", error);
     return {
       success: false,
-      message: error.message || "Callback simulation failed.",
+      message: "Something went wrong during callback simulation.",
     };
   }
 }
@@ -494,10 +494,7 @@ export async function processPaymentReturn(responseCiphertext: string) {
     console.error("[processPaymentReturn] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred during redirect processing.",
+      message: "Something went wrong during payment processing.",
     };
   }
 }

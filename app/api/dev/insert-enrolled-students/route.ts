@@ -10,39 +10,131 @@ import {
 } from "@/lib/db/schema";
 
 // Zod Schema for validation
+const arrayPreprocessSchema = z.preprocess((val) => {
+  if (val === null || val === undefined || val === "") {
+    return [];
+  }
+  if (Array.isArray(val)) {
+    return val;
+  }
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+    return [val];
+  }
+  return [];
+}, z.array(z.string()));
+
 const enrolledStudentItemSchema = z.object({
   UAN: z.string().min(1, "UAN is required"),
-  registrationNumber: z.string().optional().nullable(),
-  aadharNumber: z.string().optional().nullable(),
-  ABCID: z.string().optional().nullable(),
-  universityRoll: z.string().optional().nullable(),
+  registrationNumber: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  aadharNumber: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  ABCID: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  universityRoll: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
   name: z.string().min(1, "Name is required"),
-  fathersName: z.string().optional().nullable(),
-  mothersName: z.string().optional().nullable(),
+  fathersName: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  mothersName: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
   caste: z
     .enum(["GEN", "BC", "EBC", "SC", "ST", "OTHER"])
     .optional()
-    .nullable(),
-  reservation: z.string().optional().nullable(),
-  phone: z.string().length(10, "Phone number must be exactly 10 digits"),
-  email: z.string().email("Invalid email address"),
-  gender: z.enum(["Male", "Female", "Transgender"]),
-  DOB: z
+    .nullable()
+    .transform((val) => val || null),
+  reservation: z
     .string()
-    .transform((val) => (val.includes("T") ? val.split("T")[0] : val))
-    .refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
-      message: "DOB must be in YYYY-MM-DD format",
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  phone: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      if (!val || val.trim() === "") {
+        return null;
+      }
+      const digits = val.replace(/\D/g, "");
+      return digits.length === 10 ? digits : null;
+    }),
+  email: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      if (!val || val.trim() === "") {
+        return null;
+      }
+      return val.trim().toLowerCase();
+    }),
+  gender: z
+    .enum(["Male", "Female", "Transgender"])
+    .or(z.string().optional().nullable())
+    .transform((val) => {
+      if (!val || val.trim() === "") {
+        return null;
+      }
+      const normalized = val.trim();
+      const capitalized =
+        normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
+      if (
+        capitalized === "Male" ||
+        capitalized === "Female" ||
+        capitalized === "Transgender"
+      ) {
+        return capitalized as "Male" | "Female" | "Transgender";
+      }
+      return null;
+    }),
+  DOB: z
+    .any()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      if (!val || String(val).trim() === "") {
+        return null;
+      }
+      const str = String(val).trim();
+      const clean = str.includes("T") ? str.split("T")[0] : str;
+      return /^\d{4}-\d{2}-\d{2}$/.test(clean) ? clean : null;
     }),
   admissionType: z
     .enum(["MERIT", "SPORT", "MANAGEMENT QUOTA", "OTHER"])
     .optional()
-    .nullable(),
+    .nullable()
+    .transform((val) => val || null),
   subMJC: z.string().min(1, "Major Subject (subMJC) is required"),
-  subMIC: z.array(z.string()).optional().default([]),
-  subMDC: z.array(z.string()).optional().default([]),
-  subAEC: z.array(z.string()).optional().default([]),
-  subSEC: z.array(z.string()).optional().default([]),
-  subVAC: z.array(z.string()).optional().default([]),
+  subMIC: arrayPreprocessSchema.optional().default([]),
+  subMDC: arrayPreprocessSchema.optional().default([]),
+  subAEC: arrayPreprocessSchema.optional().default([]),
+  subSEC: arrayPreprocessSchema.optional().default([]),
+  subVAC: arrayPreprocessSchema.optional().default([]),
   batchId: z.string().min(1, "Batch ID (batchId) is required"),
   isSubmitted: z.boolean().optional().default(false),
   isFeePaid: z.boolean().optional().default(false),

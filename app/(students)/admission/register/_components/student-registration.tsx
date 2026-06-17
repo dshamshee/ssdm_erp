@@ -1,23 +1,23 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  type AcademicDetailsType,
+  academicDetailsZodSchema,
+  type DocumentsUploadType,
+  documentsUploadZodSchema,
+  type StudentDataType,
+  studentDataZodSchema,
+} from "../lib/zod-type/student-data";
+import { useMutRegisterStudent } from "../query/mut-register-student";
+import { DocumentsUploadForm } from "./documents-upload-form";
 import { PersonalDetailsForm } from "./personal-details-form";
 import { PreviousAcademicDetailsForm } from "./previous-academic-details-form";
-import { DocumentsUploadForm } from "./documents-upload-form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  studentDataZodSchema,
-  StudentDataType,
-  academicDetailsZodSchema,
-  AcademicDetailsType,
-  documentsUploadZodSchema,
-  DocumentsUploadType,
-} from "../lib/zod-type/student-data";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useMutRegisterStudent } from "../query/mut-register-student";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 export const StudentRegistration = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);

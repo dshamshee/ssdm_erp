@@ -39,10 +39,10 @@ export async function fetchCourses() {
 
     return { success: true, data: courses };
   } catch (error) {
+    console.error("[fetchCourses] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Error fetching courses",
+      message: "Something went wrong while fetching courses.",
     };
   }
 }

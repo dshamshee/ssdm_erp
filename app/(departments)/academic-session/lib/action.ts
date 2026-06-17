@@ -48,12 +48,10 @@ export async function getAcademicSessions() {
 
     return { success: true, data: academicSessions };
   } catch (error) {
+    console.error("[getAcademicSessions] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch academic sessions",
+      message: "Something went wrong while fetching academic sessions.",
     };
   }
 }
@@ -81,12 +79,10 @@ export async function addAcademicSession(input: AddAcademicSessionSchema) {
 
     return { success: true, data: academicSession };
   } catch (error) {
+    console.error("[addAcademicSession] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to add academic session",
+      message: "Something went wrong while adding academic session.",
     };
   }
 }
@@ -119,12 +115,10 @@ export async function updateAcademicSession(
 
     return { success: true, data: academicSession };
   } catch (error) {
+    console.error("[updateAcademicSession] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to update academic session",
+      message: "Something went wrong while updating academic session.",
     };
   }
 }

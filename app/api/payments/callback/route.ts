@@ -171,7 +171,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Callback API] Error:", error);
     return NextResponse.json(
-      { status: "error", message: error.message || "Internal Server Error" },
+      { status: "error", message: "Something went wrong while processing callback." },
       { status: 500 },
     );
   }

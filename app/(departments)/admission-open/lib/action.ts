@@ -2,6 +2,7 @@
 
 import { desc, eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { admissionOpenTable, batchTable } from "@/lib/db/schema";
@@ -43,12 +44,10 @@ export async function getAdmissionOpens() {
 
     return { success: true, data };
   } catch (error) {
+    console.error("[getAdmissionOpens] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch admission open records",
+      message: "Something went wrong while fetching admission records.",
     };
   }
 }
@@ -72,19 +71,20 @@ export async function addAdmissionOpen(input: AddAdmissionOpenSchema) {
         startDate: parsedInput.data.startDate,
         endDate: parsedInput.data.endDate,
         lateFee: parsedInput.data.lateFee,
+        practicalFee: parsedInput.data.practicalFee,
         isDateExtended: parsedInput.data.isDateExtended,
         extendedDate: parsedInput.data.extendedDate || null,
       })
       .returning();
 
+    revalidatePath("/");
+    revalidatePath("/admission");
     return { success: true, data: record };
   } catch (error) {
+    console.error("[addAdmissionOpen] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to add admission open record",
+      message: "Something went wrong while adding admission record.",
     };
   }
 }
@@ -107,6 +107,7 @@ export async function updateAdmissionOpen(input: UpdateAdmissionOpenSchema) {
       startDate,
       endDate,
       lateFee,
+      practicalFee,
       isDateExtended,
       extendedDate,
     } = parsedInput.data;
@@ -118,6 +119,7 @@ export async function updateAdmissionOpen(input: UpdateAdmissionOpenSchema) {
         startDate,
         endDate,
         lateFee,
+        practicalFee,
         isDateExtended,
         extendedDate: extendedDate || null,
         updatedAt: new Date(),
@@ -129,14 +131,14 @@ export async function updateAdmissionOpen(input: UpdateAdmissionOpenSchema) {
       return { success: false, message: "Admission open record not found" };
     }
 
+    revalidatePath("/");
+    revalidatePath("/admission");
     return { success: true, data: record };
   } catch (error) {
+    console.error("[updateAdmissionOpen] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to update admission open record",
+      message: "Something went wrong while updating admission record.",
     };
   }
 }
@@ -157,14 +159,14 @@ export async function deleteAdmissionOpen(id: string) {
       return { success: false, message: "Admission open record not found" };
     }
 
+    revalidatePath("/");
+    revalidatePath("/admission");
     return { success: true, data: record };
   } catch (error) {
+    console.error("[deleteAdmissionOpen] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to delete admission open record",
+      message: "Something went wrong while deleting admission record.",
     };
   }
 }
@@ -183,10 +185,10 @@ export async function getBatches() {
 
     return { success: true, data: batches };
   } catch (error) {
+    console.error("[getBatches] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to fetch batches",
+      message: "Something went wrong while fetching batches.",
     };
   }
 }

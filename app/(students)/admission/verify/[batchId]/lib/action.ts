@@ -1,14 +1,18 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
-  EnrolledStudentTable,
-  subjectTable,
   AdmittedStudentTable,
+  EnrolledStudentTable,
   StudentFeePaymentTable,
+  subjectTable,
 } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
 
+/**
+ * Verify that a student is enrolled in the given batch with the given UAN and MJC.
+ * No longer creates a user account — signup is handled after registration form submission.
+ */
 export const fetchEnrolledStudent = async ({
   batchId,
   UAN,

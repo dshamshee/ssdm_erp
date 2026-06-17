@@ -45,10 +45,10 @@ export async function fetchDepartments() {
 
     return { success: true, data: departments };
   } catch (error) {
+    console.error("[fetchDepartments] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Error fetching departments",
+      message: "Something went wrong while fetching departments.",
     };
   }
 }
@@ -142,12 +142,10 @@ export async function fetchCoursesByDepartment(departmentId: string) {
 
     return { success: true as const, data: courses };
   } catch (error) {
+    console.error("[fetchCoursesByDepartment] Error:", error);
     return {
       success: false as const,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Error fetching courses for department",
+      message: "Something went wrong while fetching courses.",
     };
   }
 }

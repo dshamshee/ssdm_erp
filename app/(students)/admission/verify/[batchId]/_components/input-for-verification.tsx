@@ -36,13 +36,13 @@ export const InputForVerification = ({
         name="uan"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel required>UAN</FieldLabel>
+            <FieldLabel required>UAN / Form Number</FieldLabel>
             <FieldContent>
               <Input
                 {...field}
                 value={field.value ?? ""}
                 aria-invalid={fieldState.invalid}
-                placeholder="Enter your UAN"
+                placeholder="Enter your UAN or Form Number"
               />
               <FieldError errors={[fieldState.error]} />
             </FieldContent>

@@ -37,10 +37,10 @@ export const EnrolledStudentTable = pgTable(
     mothersName: text(),
     caste: text(),
     reservation: text(),
-    phone: varchar({ length: 10 }).notNull(),
-    email: text().unique().notNull(),
-    gender: varchar({ length: 15 }).notNull(),
-    DOB: date().notNull(),
+    phone: varchar({ length: 10 }),
+    email: text().unique(),
+    gender: varchar({ length: 15 }),
+    DOB: date(),
     admissionType: text(),
     subMJC: varchar({ length: 128 })
       .references(() => subjectTable.id, { onDelete: "cascade" })

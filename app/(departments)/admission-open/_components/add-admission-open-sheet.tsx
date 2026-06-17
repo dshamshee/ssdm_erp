@@ -35,6 +35,7 @@ export function AddAdmissionOpenSheet() {
       startDate: "",
       endDate: "",
       lateFee: 0,
+      practicalFee: 500,
       isDateExtended: false,
       extendedDate: "",
     },
@@ -48,6 +49,7 @@ export function AddAdmissionOpenSheet() {
         startDate: "",
         endDate: "",
         lateFee: 0,
+        practicalFee: 500,
         isDateExtended: false,
         extendedDate: "",
       });

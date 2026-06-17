@@ -18,6 +18,9 @@ import {
   ShieldAlert,
 } from "lucide-react";
 
+// Force dynamic rendering — data depends on current date and admin mutations
+export const dynamic = "force-dynamic";
+
 async function getOpenAdmissions() {
   try {
     const records = await db
@@ -168,23 +171,8 @@ export default async function AdmissionPortalPage() {
                               {formatDate(displayEndDate)}
                             </span>
                           </div>
-                          <div className="flex justify-between py-2.5">
-                            <span className="text-slate-400 flex items-center gap-1.5">
-                              <IndianRupee className="h-3.5 w-3.5" /> Admission
-                              Fee
-                            </span>
-                            <span className="font-semibold">
-                              ₹{ad.perSemesterFee.toLocaleString("en-IN")}
-                            </span>
-                          </div>
-                          {ad.lateFee && ad.lateFee > 0 ? (
-                            <div className="flex justify-between py-2.5 text-amber-700 font-medium">
-                              <span className="text-amber-600 flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5" /> Late Fee
-                              </span>
-                              <span>₹{ad.lateFee}</span>
-                            </div>
-                          ) : null}
+
+
                         </div>
                       </div>
 

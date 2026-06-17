@@ -5,6 +5,7 @@ import {
   courseTable,
   academicSessionTable,
   tenderTable,
+  notice,
 } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getCollegeConfig } from "@/lib/college-config";
@@ -31,6 +32,9 @@ import {
   Check,
   Quote,
 } from "lucide-react";
+
+// Force dynamic rendering — data depends on current date and admin mutations
+export const dynamic = "force-dynamic";
 
 // Server-side data fetching
 async function getOpenAdmissions() {
@@ -80,10 +84,24 @@ async function getTenders() {
   }
 }
 
+async function getNotices() {
+  try {
+    const records = await db
+      .select()
+      .from(notice)
+      .orderBy(desc(notice.startDate));
+    return records;
+  } catch (error) {
+    console.error("Error fetching notices:", error);
+    return [];
+  }
+}
+
 export default async function Page() {
   const config = getCollegeConfig();
   const openAdmissions = await getOpenAdmissions();
   const tenders = await getTenders();
+  const notices = await getNotices();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-blue-900 selection:text-white">
@@ -196,6 +214,7 @@ export default async function Page() {
                 <NoticeBoard
                   openAdmissions={openAdmissions}
                   tenders={tenders}
+                  notices={notices}
                 />
               </div>
 
@@ -237,7 +256,27 @@ export default async function Page() {
                     </Link>
 
                     <Link
-                      href="/auth"
+                      href="/auth/student/signin"
+                      className="group flex items-center justify-between p-3.5 bg-white border border-slate-200 hover:border-blue-900 rounded-xl transition-all shadow-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-lg bg-violet-50 text-violet-700 group-hover:bg-violet-100 transition-colors">
+                          <Users className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">
+                            Student Login
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            Access your admission portal and student dashboard
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+
+                    <Link
+                      href="/auth/admin/signin"
                       className="group flex items-center justify-between p-3.5 bg-white border border-slate-200 hover:border-blue-900 rounded-xl transition-all shadow-sm"
                     >
                       <div className="flex items-center gap-3">

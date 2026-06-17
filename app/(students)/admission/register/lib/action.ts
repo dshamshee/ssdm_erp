@@ -12,11 +12,74 @@ import {
   batchTable,
   courseTable,
 } from "@/lib/db/schema/department";
+import { user } from "@/lib/db/schema/auth-schema";
 import { and, eq, inArray, sql, count } from "drizzle-orm";
 import {
   registerStudentSchema,
   type RegisterStudentPayload,
 } from "./zod-type/register-student-type";
+import { auth } from "@/lib/auth";
+
+/**
+ * Generate student password from their name and Aadhar number.
+ * Format: first 4 chars of name (lowercase, no spaces) + last 4 digits of Aadhar
+ * If name has 3 or fewer characters, use last 5 digits of Aadhar instead.
+ * Example: name="Amit Kumar", Aadhar="123456781234" → "amit1234"
+ * Example: name="Ram", Aadhar="123456781234" → "ram81234"
+ */
+function generateStudentPassword(name: string, aadharNumber: string): string {
+  const cleanName = name.replace(/\s+/g, "").toLowerCase();
+  if (cleanName.length <= 3) {
+    return `${cleanName}${aadharNumber.slice(-5)}`;
+  }
+  return `${cleanName.slice(0, 4)}${aadharNumber.slice(-4)}`;
+}
+
+/**
+ * Generate a synthetic email from UAN for better-auth (which requires email).
+ * Format: uan@student.ssdm.local
+ */
+function generateStudentEmail(uan: string): string {
+  return `${uan.toLowerCase()}@student.ssdm.local`;
+}
+
+/**
+ * Silently create a student auth account in the background after registration.
+ * This is fire-and-forget — errors are logged but don't affect the registration flow.
+ */
+async function backgroundSignupStudent({
+  name,
+  uan,
+  aadharNumber,
+}: {
+  name: string;
+  uan: string;
+  aadharNumber: string;
+}) {
+  try {
+    const email = generateStudentEmail(uan);
+    const password = generateStudentPassword(name, aadharNumber);
+
+    // Check if account already exists
+    const existingUser = await db.query.user.findFirst({
+      where: eq(user.email, email),
+    });
+
+    if (!existingUser) {
+      await auth.api.signUpEmail({
+        body: {
+          name,
+          email,
+          password,
+          role: "student",
+        },
+      });
+    }
+  } catch (error) {
+    // Silent failure — don't break registration flow
+    console.error("[Background Student Signup] Error:", error);
+  }
+}
 
 export const fetchEnrolledStudent = async ({
   batch,
@@ -122,7 +185,7 @@ export async function registerStudent(payload: RegisterStudentPayload) {
   if (!parsed.success) {
     return {
       success: false as const,
-      message: "Invalid payload: " + parsed.error.message,
+      message: "Invalid registration details.",
     };
   }
 
@@ -303,6 +366,15 @@ export async function registerStudent(payload: RegisterStudentPayload) {
       hasPractical = subjects.some((s) => s.hasPractical === true);
     }
 
+    // Fire-and-forget: create auth account in background after successful registration
+    backgroundSignupStudent({
+      name: personal.name,
+      uan: personal.UAN,
+      aadharNumber: personal.AadharNumber,
+    }).catch((err) =>
+      console.error("[Background Student Signup] Unhandled:", err),
+    );
+
     return { success: true as const, data: { ...data, hasPractical } };
   } catch (error: any) {
     console.error("[registerStudent] Error:", error);
@@ -318,7 +390,7 @@ export async function registerStudent(payload: RegisterStudentPayload) {
 
     return {
       success: false as const,
-      message: error?.message || "Failed to register student",
+      message: "Something went wrong while registering student.",
     };
   }
 }

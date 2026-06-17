@@ -1,8 +1,8 @@
-import { getStudentPaymentDetails } from "./lib/action";
-import { PaymentContainer } from "./_components/payment-container";
-import { getCollegeConfig } from "@/lib/college-config";
-import { SiteHeader } from "@/components/informative/site-header";
 import { SiteFooter } from "@/components/informative/site-footer";
+import { SiteHeader } from "@/components/informative/site-header";
+import { getCollegeConfig } from "@/lib/college-config";
+import { PaymentContainer } from "./_components/payment-container";
+import { getStudentPaymentDetails } from "./lib/action";
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -21,7 +21,8 @@ export default async function PaymentPage({ searchParams }: PageProps) {
 
   let initialError: string | null = null;
   if (errorParam === "payment_failed") {
-    initialError = "The transaction request was rejected or failed at the secure payment gateway. Please retry or try another payment method.";
+    initialError =
+      "The transaction request was rejected or failed at the secure payment gateway. Please retry or try another payment method.";
   }
 
   return (

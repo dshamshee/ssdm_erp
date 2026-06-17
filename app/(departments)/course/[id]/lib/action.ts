@@ -40,9 +40,10 @@ export async function fetchCourseById(courseId: string) {
 
     return { success: true, data: course };
   } catch (error) {
+    console.error("[fetchCourseById] Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Error fetching course",
+      message: "Something went wrong while fetching course.",
     };
   }
 }
@@ -63,10 +64,10 @@ export async function fetchBatchesByCourse(courseId: string) {
 
     return { success: true, data: batches };
   } catch (error) {
+    console.error("[fetchBatchesByCourse] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Error fetching batches",
+      message: "Something went wrong while fetching batches.",
     };
   }
 }
@@ -108,9 +109,10 @@ export async function addBatch(input: AddBatchSchema) {
 
     return { success: true, data: batch };
   } catch (error) {
+    console.error("[addBatch] Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to add batch",
+      message: "Something went wrong while adding batch.",
     };
   }
 }

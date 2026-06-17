@@ -7,6 +7,7 @@ import {
   batchTable,
   admissionOpenTable,
   tenderTable,
+  notice,
 } from "@/lib/db/schema";
 
 const NUM_RECORDS = 5;
@@ -17,6 +18,7 @@ async function main() {
     // Clear existing data to prevent unique constraint errors
     await db.delete(admissionOpenTable);
     await db.delete(tenderTable);
+    await db.delete(notice);
     await db.delete(batchTable);
     await db.delete(courseTable);
     await db.delete(subjectTable);
@@ -164,6 +166,34 @@ async function main() {
 
     await db.insert(tenderTable).values(tenders);
     console.log(`✅ Seeded ${tenders.length} tenders.`);
+
+    // 7. Seed Notices
+    const notices = [
+      {
+        title: "Registration for Semester I (Session 2026-30) Regular & Vocational Courses",
+        description: "All students are directed to register and submit their documents online before the deadline.",
+        startDate: `${currentYear}-06-10`,
+        endDate: `${currentYear}-07-20`,
+        file: "https://res.cloudinary.com/demo/image/upload/v1624103197/sample.pdf",
+      },
+      {
+        title: "Holiday Notice: Summer Vacation 2026",
+        description: "The college will remain closed for summer vacation from 1st June to 30th June 2026.",
+        startDate: `${currentYear}-05-25`,
+        endDate: `${currentYear}-06-30`,
+        file: "https://res.cloudinary.com/demo/image/upload/v1624103197/sample.pdf",
+      },
+      {
+        title: "B.Sc Physics Practical Examination Schedule - Semester II",
+        description: "Detailed schedule for the practical examinations for B.Sc Physics Semester II students.",
+        startDate: `${currentYear}-06-12`,
+        endDate: `${currentYear}-06-25`,
+        file: "https://res.cloudinary.com/demo/image/upload/v1624103197/sample.pdf",
+      },
+    ];
+
+    await db.insert(notice).values(notices);
+    console.log(`✅ Seeded ${notices.length} notices.`);
 
     console.log(`🎉 Successfully seeded master tables!`);
     process.exit(0);

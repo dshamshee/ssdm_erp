@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-const SUBJECT_CATEGORIES = ["SCIENCE", "COMMERCE", "ARTS"];
+const SUBJECT_CATEGORIES = ["SCIENCE", "COMMERCE", "ARTS", "GENERAL"];
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

@@ -39,10 +39,10 @@ export async function getSubjects() {
 
     return { success: true, data: subjects };
   } catch (error) {
+    console.error("[getSubjects] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to fetch subjects",
+      message: "Something went wrong while fetching subjects.",
     };
   }
 }
@@ -72,9 +72,10 @@ export async function addSubject(input: AddSubjectSchema) {
 
     return { success: true, data: subject };
   } catch (error) {
+    console.error("[addSubject] Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to add subject",
+      message: "Something went wrong while adding subject.",
     };
   }
 }
@@ -113,10 +114,10 @@ export async function updateSubject(input: UpdateSubjectSchema) {
 
     return { success: true, data: subject };
   } catch (error) {
+    console.error("[updateSubject] Error:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to update subject",
+      message: "Something went wrong while updating subject.",
     };
   }
 }

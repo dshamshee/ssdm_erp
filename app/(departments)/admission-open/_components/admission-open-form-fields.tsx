@@ -97,26 +97,49 @@ export function AdmissionOpenFormFields({
         />
       </div>
 
-      <Controller
-        control={form.control}
-        name="lateFee"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Late Fee (Amount)</FieldLabel>
-            <FieldContent>
-              <Input
-                type="number"
-                min={0}
-                placeholder="0"
-                value={field.value ?? 0}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-                aria-invalid={fieldState.invalid}
-              />
-              <FieldError errors={[fieldState.error]} />
-            </FieldContent>
-          </Field>
-        )}
-      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Controller
+          control={form.control}
+          name="lateFee"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Late Fee (₹)</FieldLabel>
+              <FieldContent>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={field.value ?? 0}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </FieldContent>
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="practicalFee"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Practical Fee (₹)</FieldLabel>
+              <FieldContent>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="500"
+                  value={field.value ?? 500}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </FieldContent>
+            </Field>
+          )}
+        />
+      </div>
 
       <div className="flex items-center justify-between rounded-lg border p-4">
         <div className="space-y-0.5">

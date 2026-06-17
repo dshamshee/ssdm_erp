@@ -47,6 +47,7 @@ export function EditAdmissionOpenSheet({
       startDate: record.startDate,
       endDate: record.endDate,
       lateFee: record.lateFee ?? 0,
+      practicalFee: record.practicalFee ?? 500,
       isDateExtended: record.isDateExtended ?? false,
       extendedDate: record.extendedDate ?? "",
     },
@@ -72,6 +73,7 @@ export function EditAdmissionOpenSheet({
             startDate: record.startDate,
             endDate: record.endDate,
             lateFee: record.lateFee ?? 0,
+            practicalFee: record.practicalFee ?? 500,
             isDateExtended: record.isDateExtended ?? false,
             extendedDate: record.extendedDate ?? "",
           });

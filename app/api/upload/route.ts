@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { NextResponse } from "next/server";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -19,6 +19,10 @@ export async function POST(req: Request) {
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
 
+          const isPdf =
+            file.type === "application/pdf" ||
+            file.name.toLowerCase().endsWith(".pdf");
+
           // Upload to Cloudinary using streams
           const secureUrl = await new Promise<string>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
@@ -29,11 +33,16 @@ export async function POST(req: Request) {
                   "",
                 ),
                 resource_type: "auto",
-                transformation: [
-                  { width: 1200, height: 1200, crop: "limit" }, // Limit dimensions to keep it compact
-                  { quality: "auto:eco" }, // Compress quality to reduce file size under 200kb
-                  { fetch_format: "auto" }, // Auto convert to webp/avif if possible
-                ],
+                // Only apply image transformations to non-PDF files to prevent rasterizing PDFs to single-page images
+                ...(isPdf
+                  ? {}
+                  : {
+                      transformation: [
+                        { width: 1200, height: 1200, crop: "limit" }, // Limit dimensions to keep it compact
+                        { quality: "auto:eco" }, // Compress quality to reduce file size under 200kb
+                        { fetch_format: "auto" }, // Auto convert to webp/avif if possible
+                      ],
+                    }),
               },
               (error, result) => {
                 if (error) {

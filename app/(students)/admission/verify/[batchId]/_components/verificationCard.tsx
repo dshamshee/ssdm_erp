@@ -1,18 +1,18 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  VerifyStudentUANType,
+  type VerifyStudentUANType,
   verifyStudentUANZodSchema,
 } from "../lib/zod-type/verify-student-uan";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { InputForVerification } from "./input-for-verification";
-import { useMutation } from "@tanstack/react-query";
 import { verifyEnrolledStudentMutationOptions } from "../query/verify-enrolled-student";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { InputForVerification } from "./input-for-verification";
 
 export const VerificationCard = ({ batchId }: { batchId: string }) => {
   const router = useRouter();
