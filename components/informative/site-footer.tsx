@@ -105,11 +105,22 @@ export function SiteFooter({ config }: { config: CollegeConfig }) {
           </div>
         </div>
 
-        <div className="border-t border-slate-800 mt-10 pt-6 text-center text-[10px] text-slate-500 space-y-1">
+        <div className="border-t border-slate-800 mt-10 pt-6 text-center text-[10px] text-slate-500 space-y-1.5">
           <p>
             © {new Date().getFullYear()} {config.name}. All Rights Reserved.
           </p>
           <p>Affiliated to Patliputra University, Patna.</p>
+          <p className="text-slate-600">
+            Developed & Managed by{" "}
+            <a
+              href="https://vaastman.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 font-medium hover:underline hover:text-blue-400 transition-colors"
+            >
+              Vastaman Solutions
+            </a>
+          </p>
         </div>
       </div>
     </footer>

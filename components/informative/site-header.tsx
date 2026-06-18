@@ -8,7 +8,35 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/#about" },
   { label: "Departments", href: "/#academics" },
-  { label: "Student Zone", href: "/#quick-links" },
+  {
+    label: "Infrastructure",
+    href: "/infrastructure",
+    items: [
+      { label: "Conference Hall", href: "/infrastructure/conference-hall" },
+      { label: "Auditorium", href: "/infrastructure/auditorium" },
+      { label: "Laboratories", href: "/infrastructure/laboratories" },
+      { label: "Library", href: "/infrastructure/library" },
+      { label: "Computer Lab", href: "/infrastructure/computer-lab" },
+      { label: "Health Center", href: "/infrastructure/health-center" },
+      { label: "Sports Complex", href: "/infrastructure/sports-complex" },
+    ],
+  },
+  {
+    label: "Gallery",
+    href: "/gallery",
+    items: [
+      { label: "Photo Gallery", href: "/gallery/photo" },
+      { label: "Video Gallery", href: "/gallery/video" },
+    ],
+  },
+  {
+    label: "Student Zone",
+    href: "/student-zone",
+    items: [
+      { label: "Holidays", href: "/student-zone/holidays" },
+      { label: "Syllabus", href: "/student-zone/syllabus" },
+    ],
+  },
   { label: "Contact", href: "/#contact" },
 ];
 
@@ -60,15 +88,36 @@ export function SiteHeader({ collegeName }: { collegeName: string }) {
 
           {/* Desktop links */}
           <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-[13px] font-semibold text-slate-600 hover:text-blue-900 transition-colors"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {navLinks.map((l) =>
+              l.items ? (
+                <div key={l.label} className="relative group py-4">
+                  <button className="flex items-center gap-1 text-[13px] font-semibold text-slate-600 hover:text-blue-900 transition-colors focus:outline-none cursor-pointer">
+                    {l.label}
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
+                  </button>
+                  {/* Dropdown Menu */}
+                  <div className="absolute top-full left-0 mt-1 w-56 rounded-xl bg-white border border-slate-100 p-2 shadow-xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                    {l.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="block px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-900 transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-[13px] font-semibold text-slate-600 hover:text-blue-900 transition-colors"
+                >
+                  {l.label}
+                </Link>
+              )
+            )}
             <Link
               href="/admission"
               className="ml-2 px-5 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white hover:bg-blue-800 shadow-md shadow-blue-900/10 transition-all"
@@ -91,21 +140,41 @@ export function SiteHeader({ collegeName }: { collegeName: string }) {
 
       {/* Mobile menu */}
       {open && (
-        <nav className="md:hidden border-t border-slate-100 bg-white px-4 pb-4 pt-2 space-y-1 animate-in slide-in-from-top-2 duration-150">
+        <nav className="md:hidden border-t border-slate-100 bg-white px-4 pb-4 pt-2 max-h-[80vh] overflow-y-auto space-y-1 animate-in slide-in-from-top-2 duration-150">
           {navLinks.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              {l.label}
-            </Link>
+            <div key={l.label} className="space-y-1">
+              {l.items ? (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">
+                    {l.label}
+                  </div>
+                  {l.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="block pl-6 pr-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </>
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {l.label}
+                </Link>
+              )}
+            </div>
           ))}
           <Link
             href="/admission"
             onClick={() => setOpen(false)}
-            className="block text-center px-4 py-2.5 mt-2 rounded-lg bg-blue-900 text-white text-sm font-bold"
+            className="block text-center px-4 py-2.5 mt-4 rounded-lg bg-blue-900 text-white text-sm font-bold"
           >
             Online Admission
           </Link>

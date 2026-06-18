@@ -29,6 +29,8 @@ import {
   Laptop,
   Building,
   GraduationCap,
+  Check,
+  Quote,
 } from "lucide-react";
 
 // Force dynamic rendering — data depends on current date and admin mutations
@@ -397,42 +399,205 @@ export default async function Page() {
                 </div>
               </div>
 
-              {/* Principal's message (Spans 5) */}
-              <div className="lg:col-span-5">
-                <div className="bg-gradient-to-br from-blue-950 to-indigo-950 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
-                  {/* Decorative quotes */}
-                  <div className="absolute right-6 top-6 text-blue-900/30 font-serif text-8xl pointer-events-none leading-none select-none">
-                    “
-                  </div>
-                  <div className="absolute left-6 bottom-6 text-blue-900/30 font-serif text-8xl pointer-events-none leading-none select-none">
-                    ”
-                  </div>
-
-                  <div className="space-y-6 relative z-10">
-                    <h3 className="text-lg font-bold text-blue-300 tracking-wide uppercase">
-                      Principal's Desk
-                    </h3>
-                    <p className="text-slate-300 text-xs italic leading-relaxed font-light">
-                      "Education is the most powerful weapon which you can use
-                      to change the world. At our college, we don't just teach
-                      curricula; we shape character, build resilience, and
-                      ignite minds to think beyond boundaries. I welcome you all
-                      to this transformative educational journey."
-                    </p>
-                    <div className="pt-4 border-t border-white/10 flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center font-bold text-xs text-white uppercase shadow-inner">
-                        PS
+              {/* Why Choose Us Section (Spans 5) */}
+              <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200/60">
+                  <GraduationCap className="h-6 w-6 text-blue-900" />
+                  <h3 className="text-xl font-bold text-blue-900">Why Choose Us?</h3>
+                </div>
+                <div className="space-y-5">
+                  {[
+                    {
+                      title: "Academic Excellence",
+                      desc: "High-quality education across diverse streams.",
+                    },
+                    {
+                      title: "Modern Infrastructure",
+                      desc: "Fully equipped science labs and a central library.",
+                    },
+                    {
+                      title: "Holistic Development",
+                      desc: "Encouraging sports, cultural events, NCC, and NSS.",
+                    },
+                    {
+                      title: "Women Empowerment",
+                      desc: "Dedicated to building independent and confident leaders.",
+                    },
+                    {
+                      title: "Student-Centric Approach",
+                      desc: "Mentorship, guidance, and active support cells.",
+                    },
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-4 group">
+                      <div className="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-950 group-hover:bg-blue-900 group-hover:text-white transition-colors duration-300">
+                        <Check className="h-3.5 w-3.5" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">
-                          Prof. Shweta Sinha
-                        </p>
-                        <p className="text-[10px] text-blue-300">
-                          Principal, SSDM College
+                        <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-blue-900 transition-colors">
+                          {item.title}
+                        </h4>
+                        <p className="text-slate-500 text-[10px] md:text-xs leading-relaxed">
+                          {item.desc}
                         </p>
                       </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Principal's Message Section */}
+        <section className="w-full py-16 px-4 md:px-8 flex justify-center bg-white border-y border-slate-200">
+          <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+            {/* Principal's photo */}
+            <div className="lg:col-span-4 flex justify-center lg:justify-start">
+              <div className="relative group max-w-[280px] w-full">
+                <div className="aspect-[3/4] bg-slate-200 rounded-[2rem] overflow-hidden shadow-xl border-8 border-white relative z-10">
+                  <Image
+                    src="/images/principal.jpeg"
+                    alt="Prof. Kaushal Kishor Singh"
+                    width={300}
+                    height={400}
+                    priority
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="absolute -bottom-3 -right-3 w-full h-full bg-blue-900 rounded-[2rem] -z-10 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform duration-500" />
+              </div>
+            </div>
+
+            {/* Principal's Message text */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <div className="space-y-3">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-900">
+                  Leadership Message
+                </span>
+                <h2 className="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight uppercase">
+                  Principal's Message
+                </h2>
+                <div className="h-1 w-20 bg-blue-900 rounded-full" />
+              </div>
+
+              <div className="relative text-slate-600 leading-relaxed text-sm md:text-base space-y-4">
+                <Quote className="absolute -top-6 -left-6 text-blue-100/40 h-16 w-16 -z-10 pointer-events-none select-none" />
+                <p className="font-semibold text-slate-800 italic text-base md:text-lg">
+                  "Dear Students, Faculty, and Visitors,"
+                </p>
+                <p className="text-justify">
+                  It gives me immense pleasure to welcome you to {config.name}, an institution dedicated to nurturing talent, fostering innovation, and shaping responsible citizens. Education, in our view, is not merely the acquisition of knowledge but the cultivation of values, discipline, and a spirit of inquiry that prepares individuals for life's challenges.
+                </p>
+                <p className="text-justify font-light">
+                  At our college, we strive to create an environment where academic excellence goes hand in hand with holistic development. Our dedicated faculty, modern infrastructure, and student-centric approach ensure that every learner receives the guidance needed to excel and become an empowered leader of tomorrow.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pt-4 border-t border-slate-200">
+                <div>
+                  <p className="font-bold text-slate-800 text-base">
+                    Prof. Kaushal Kishor Singh
+                  </p>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Principal, {config.name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Mentors Section */}
+        <section className="w-full py-16 px-4 md:px-8 flex justify-center bg-slate-50 border-b border-slate-200">
+          <div className="max-w-7xl w-full flex flex-col items-center justify-center">
+            {/* Header with lines */}
+            <div className="flex items-center justify-center gap-4 md:gap-8 mb-12 w-full max-w-5xl">
+              <hr className="flex-grow border-t-2 border-blue-900/10" />
+              <h2 className="text-2xl md:text-3xl text-blue-900 font-bold whitespace-nowrap tracking-tight uppercase">
+                Our Mentors
+              </h2>
+              <hr className="flex-grow border-t-2 border-blue-900/10" />
+            </div>
+
+            {/* Mentors grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-6xl justify-items-center">
+              {/* Mentor 1: Governor */}
+              <div className="group w-full max-w-sm h-auto pb-6 overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white flex flex-col">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                  <Image
+                    src="/images/governer.jpeg"
+                    alt="Lt Gen Syed Ata Hasnain (Retd.)"
+                    fill
+                    className="object-contain p-2 transition-transform duration-500 group-hover:scale-102"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 pt-6 flex-grow">
+                  <h3 className="text-center text-sm md:text-base font-bold text-slate-800 leading-tight">
+                    Lt Gen Syed Ata Hasnain (Retd.)
+                  </h3>
+                  <p className="text-center text-[10px] md:text-xs font-semibold text-blue-905 text-blue-700 uppercase tracking-wider mt-3 px-2">
+                    Hon'ble Chancellor-cum-Governor of Bihar
+                  </p>
+                </div>
+              </div>
+
+              {/* Mentor 2: CM/Deputy CM */}
+              <div className="group w-full max-w-sm h-auto pb-6 overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white flex flex-col">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                  <Image
+                    src="/images/cm.jpeg"
+                    alt="Shri Samrat Chaudhary"
+                    fill
+                    className="object-contain p-2 transition-transform duration-500 group-hover:scale-102"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 pt-6 flex-grow">
+                  <h3 className="text-center text-sm md:text-base font-bold text-slate-800 leading-tight">
+                    Shri Samrat Chaudhary
+                  </h3>
+                  <p className="text-center text-[10px] md:text-xs font-semibold text-blue-705 text-blue-700 uppercase tracking-wider mt-3 px-2">
+                    Hon'ble Chief Minister, Bihar
+                  </p>
+                </div>
+              </div>
+
+              {/* Mentor 3: VC */}
+              <div className="group w-full max-w-sm h-auto pb-6 overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white flex flex-col">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                  <Image
+                    src="/images/vc.jpeg"
+                    alt="Prof. Upendra Prasad Singh"
+                    fill
+                    className="object-contain p-2 transition-transform duration-500 group-hover:scale-102"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 pt-6 flex-grow">
+                  <h3 className="text-center text-sm md:text-base font-bold text-slate-800 leading-tight">
+                    Prof. Upendra Prasad Singh
+                  </h3>
+                  <p className="text-center text-[10px] md:text-xs font-semibold text-blue-705 text-blue-700 uppercase tracking-wider mt-3 px-2">
+                    Hon'ble Vice Chancellor, Patliputra University
+                  </p>
+                </div>
+              </div>
+
+              {/* Mentor 4: Principal */}
+              <div className="group w-full max-w-sm h-auto pb-6 overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white flex flex-col">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                  <Image
+                    src="/images/principal.jpeg"
+                    alt="Prof. Kaushal Kishor Singh"
+                    fill
+                    className="object-contain p-2 transition-transform duration-500 group-hover:scale-102"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 pt-6 flex-grow">
+                  <h3 className="text-center text-sm md:text-base font-bold text-slate-800 leading-tight">
+                    Prof. Kaushal Kishor Singh
+                  </h3>
+                  <p className="text-center text-[10px] md:text-xs font-semibold text-blue-705 text-blue-700 uppercase tracking-wider mt-3 px-2">
+                    Principal, {config.name}
+                  </p>
                 </div>
               </div>
             </div>
@@ -459,75 +624,6 @@ export default async function Page() {
             </div>
 
             <AcademicsSection />
-          </div>
-        </section>
-
-        {/* College Facilities Section */}
-        <section className="py-20 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-            <div className="text-center space-y-3 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-900 text-xs font-bold uppercase tracking-wider">
-                Infrastructure
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight uppercase">
-                Campus Amenities & Facilities
-              </h2>
-              <p className="text-slate-500 text-xs max-w-md mx-auto leading-relaxed">
-                We provide state-of-the-art facilities to create an ideal
-                environment for studying, researching, and extracurricular
-                development.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {[
-                {
-                  title: "Central Library",
-                  desc: "A vast repository of reference manuals, research journals, and digitised learning resources accessible to all students.",
-                  icon: <Library className="h-6 w-6 text-blue-700" />,
-                },
-                {
-                  title: "Advanced Science Labs",
-                  desc: "Equipped with state-of-the-art instruments for physics, chemistry, and biology research and experiment work.",
-                  icon: <FlaskConical className="h-6 w-6 text-indigo-700" />,
-                },
-                {
-                  title: "Computer Lab & Wi-Fi",
-                  desc: "Modern computing hardware setup with high-speed internet connections for technical training, BCA, and digital learning.",
-                  icon: <Laptop className="h-6 w-6 text-cyan-700" />,
-                },
-                {
-                  title: "NCC & NSS Wings",
-                  desc: "Active wings for civic training, leadership building, community service, national integrity, and social wellness.",
-                  icon: <Award className="h-6 w-6 text-violet-700" />,
-                },
-                {
-                  title: "Placement & Counseling Cell",
-                  desc: "Guidance office helping students choose careers, build resumes, prepare for interviews, and secure college placements.",
-                  icon: <Users className="h-6 w-6 text-emerald-700" />,
-                },
-                {
-                  title: "Sports Complex & Cafeteria",
-                  desc: "Indoor & outdoor sports areas along with a hygienic cafeteria offering wholesome nutritious meals at pocket-friendly prices.",
-                  icon: <Building className="h-6 w-6 text-amber-700" />,
-                },
-              ].map((facility, i) => (
-                <div
-                  key={i}
-                  className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group space-y-4"
-                >
-                  <div className="p-3 bg-slate-50 rounded-xl w-fit group-hover:bg-blue-50 transition-colors">
-                    {facility.icon}
-                  </div>
-                  <h3 className="font-bold text-slate-800 text-sm group-hover:text-blue-900 transition-colors">
-                    {facility.title}
-                  </h3>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    {facility.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
