@@ -10,6 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
+import { AdmittedStudentTable } from "./student";
 
 // Independent master table
 export const academicSessionTable = pgTable("academic_session", {
@@ -272,6 +273,8 @@ export const courseSessionRelations = relations(
     }),
 
     admissionOpen: many(admissionOpenTable),
+
+    admittedStudents: many(AdmittedStudentTable),
   }),
 );
 

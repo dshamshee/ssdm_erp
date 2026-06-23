@@ -64,8 +64,8 @@ async function main() {
       .returning();
     console.log(`✅ Seeded ${departments.length} departments.`);
 
-    // 3. Seed Courses and Batches for each department
-    const insertedBatches: Array<{ id: string; deptCode: string }> = [];
+    // 3. Seed Courses and Batches for each department × each session
+    const insertedBatches: Array<{ id: string; deptCode: string; sessionName: string }> = [];
     for (const dept of insertedDepts) {
       const course = {
         name: `B.Sc in ${dept.name}`,
@@ -80,20 +80,23 @@ async function main() {
         .values(course)
         .returning();
 
-      const batch = {
-        courseId: insertedCourse.id,
-        academicSessionId: insertedSessions[insertedSessions.length - 1].id, // Most recent session
-        perSemesterFee: 5000,
-        isActive: true,
-      };
+      // Create a batch for every session (not just the latest)
+      for (const session of insertedSessions) {
+        const batch = {
+          courseId: insertedCourse.id,
+          academicSessionId: session.id,
+          perSemesterFee: 5000,
+          isActive: true,
+        };
 
-      const [insertedBatch] = await db
-        .insert(batchTable)
-        .values(batch)
-        .returning();
-      insertedBatches.push({ ...insertedBatch, deptCode: dept.code });
+        const [insertedBatch] = await db
+          .insert(batchTable)
+          .values(batch)
+          .returning();
+        insertedBatches.push({ ...insertedBatch, deptCode: dept.code, sessionName: session.name });
+      }
     }
-    console.log(`✅ Seeded courses and batches.`);
+    console.log(`✅ Seeded courses and ${insertedBatches.length} batches (all sessions × all departments).`);
 
     // 4. Seed Admission Open (only for a few batches, not all)
     const batchesForAdmission = insertedBatches.filter((b) =>

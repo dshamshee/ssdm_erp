@@ -18,7 +18,6 @@ import {
   academicSessionTable,
   subjectTable,
 } from "./department";
-import { json } from "zod";
 
 // Enrolled Students
 export const EnrolledStudentTable = pgTable(
@@ -123,6 +122,7 @@ export const AdmittedStudentTable = pgTable(
     internshipFee: integer().default(0),
     isProfileCompleted: boolean().notNull().default(false),
     isDetained: boolean().notNull().default(false),
+    isPassed: boolean().notNull().default(false),
     isActive: boolean().notNull().default(true),
     detainRemark: text().default(""),
     createdAt: timestamp().defaultNow().notNull(),
@@ -273,10 +273,10 @@ export const enrolledStudentRelations = relations(
 export const admittedStudentRelations = relations(
   AdmittedStudentTable,
   ({ one, many }) => ({
-    // currentSemester: one(semesterTable, {
-    //   fields: [AdmittedStudentTable.currentSemesterId],
-    //   references: [semesterTable.id],
-    // }),
+    batch: one(batchTable, {
+      fields: [AdmittedStudentTable.batchId],
+      references: [batchTable.id],
+    }),
 
     previousAcademicRecord: one(StudentPreviousAcademicRecordTable),
 

@@ -8,6 +8,7 @@ import {
   IconSchool,
   IconUserCheck,
   IconBell,
+  IconTrendingUp,
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 
@@ -91,7 +92,13 @@ export function getMenuList(pathname: string): Group[] {
           href: "/admission",
           label: "Admission",
           icon: IconUserCheck,
-          active: pathname.startsWith("/admission"),
+          active: pathname === "/admission" || pathname.startsWith("/admission/register") || pathname.startsWith("/admission/payment") || pathname.startsWith("/admission/verify"),
+        },
+        {
+          href: "/promote-students",
+          label: "Promote Students",
+          icon: IconTrendingUp,
+          active: pathname.startsWith("/promote-students"),
         },
         {
           href: "/examination",
