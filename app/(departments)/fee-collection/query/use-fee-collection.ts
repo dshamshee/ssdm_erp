@@ -1,5 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { getFilterOptions, getFeeCollectionReport, getGlobalFeeStats } from "../lib/action";
+import {
+  getFeeCollectionReport,
+  getFilterOptions,
+  getGlobalFeeStats,
+} from "../lib/action";
+
+interface AdmissionDateFilter {
+  mode: "all" | "date" | "range";
+  admissionDateFrom?: string;
+  admissionDateTo?: string;
+}
 
 export function useFilterOptions() {
   return useQuery({
@@ -19,7 +29,9 @@ export function useFeeCollectionReport(batchId: string, semesterCount: number) {
   return useQuery({
     queryKey: ["fee-collection-report", batchId, semesterCount],
     queryFn: async () => {
-      if (!batchId || !semesterCount) return null;
+      if (!batchId || !semesterCount) {
+        return null;
+      }
       const res = await getFeeCollectionReport(batchId, semesterCount);
       if (!res.success) {
         throw new Error(res.message);
@@ -31,11 +43,16 @@ export function useFeeCollectionReport(batchId: string, semesterCount: number) {
   });
 }
 
-export function useGlobalFeeStats() {
+export function useGlobalFeeStats(filter?: AdmissionDateFilter) {
   return useQuery({
-    queryKey: ["global-fee-stats"],
+    queryKey: [
+      "global-fee-stats",
+      filter?.mode,
+      filter?.admissionDateFrom,
+      filter?.admissionDateTo,
+    ],
     queryFn: async () => {
-      const res = await getGlobalFeeStats();
+      const res = await getGlobalFeeStats(filter);
       if (!res.success) {
         throw new Error(res.message);
       }
@@ -44,4 +61,3 @@ export function useGlobalFeeStats() {
     retry: false,
   });
 }
-

@@ -10,6 +10,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -72,6 +73,13 @@ export function DataTable<TData, TValue>({
             </TableRow>
           )}
         </TableBody>
+        <TableFooter>
+          <TableRow className="hover:bg-muted/50">
+            <TableCell colSpan={columns.length} className="text-right">
+              Total Batches: {data.length}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
