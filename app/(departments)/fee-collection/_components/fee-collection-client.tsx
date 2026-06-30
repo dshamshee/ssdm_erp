@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Loader2,
-  UserPlus,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Loader2, UserPlus, Users, Wallet } from "lucide-react";
 import { useState } from "react";
 import { ContentLayout } from "@/components/content-layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,9 +17,12 @@ import {
   useFeeCollectionReport,
   useFilterOptions,
   useGlobalFeeStats,
+  usePaymentsByDate,
+  usePaymentStats,
 } from "../query/use-fee-collection";
 import { AdmissionDateTable } from "./admission-date-table";
 import { CollectionTable } from "./collection-table";
+import { PaymentDateTable } from "./payment-date-table";
 
 type AdmissionDateMode = "all" | "date" | "range";
 
@@ -47,6 +45,12 @@ export function FeeCollectionClient() {
   const [admissionDateFrom, setAdmissionDateFrom] = useState<string>(todayDate);
   const [admissionDateTo, setAdmissionDateTo] = useState<string>(todayDate);
 
+  const [paymentDateMode, setPaymentDateMode] =
+    useState<AdmissionDateMode>("all");
+  const [paymentDate, setPaymentDate] = useState<string>(todayDate);
+  const [paymentDateFrom, setPaymentDateFrom] = useState<string>(todayDate);
+  const [paymentDateTo, setPaymentDateTo] = useState<string>(todayDate);
+
   const admissionDateFilter = {
     mode: admissionDateMode,
     admissionDateFrom:
@@ -59,8 +63,26 @@ export function FeeCollectionClient() {
         : admissionDate || todayDate,
   };
 
-  const { data: globalStats, isFetching: isFetchingStats } = useGlobalFeeStats(admissionDateFilter);
-  const { data: admissionsByDate, isLoading: isLoadingAdmissions } = useAdmissionsByDate(admissionDateFilter);
+  const paymentDateFilter = {
+    mode: paymentDateMode,
+    admissionDateFrom:
+      paymentDateMode === "range"
+        ? paymentDateFrom || todayDate
+        : paymentDate || todayDate,
+    admissionDateTo:
+      paymentDateMode === "range"
+        ? paymentDateTo || paymentDateFrom || todayDate
+        : paymentDate || todayDate,
+  };
+
+  const { data: globalStats, isFetching: isFetchingStats } =
+    useGlobalFeeStats(admissionDateFilter);
+  const { data: admissionsByDate, isLoading: isLoadingAdmissions } =
+    useAdmissionsByDate(admissionDateFilter);
+  const { data: paymentStats, isFetching: isFetchingPaymentStats } =
+    usePaymentStats(paymentDateFilter);
+  const { data: paymentsByDate, isLoading: isLoadingPayments } =
+    usePaymentsByDate(paymentDateFilter);
   const { data: courses, isLoading: isLoadingOptions } = useFilterOptions();
 
   const isAllCourses = selectedCourseId === "all";
@@ -68,10 +90,7 @@ export function FeeCollectionClient() {
 
   const allBatches = isAllCourses
     ? (courses ?? []).flatMap((c) =>
-        c.batches.map((b) => ({
-          ...b,
-          courseName: c.name,
-        })),
+        c.batches.map((b) => ({ ...b, courseName: c.name })),
       )
     : [];
 
@@ -178,8 +197,8 @@ export function FeeCollectionClient() {
                   {admissionDateMode === "all"
                     ? "Total Students (All Time)"
                     : admissionDateMode === "range"
-                    ? "Students In Range"
-                    : "Students On Date"}
+                      ? "Students In Range"
+                      : "Students On Date"}
                 </p>
                 <div className="flex h-7 items-center">
                   {isFetchingStats ? (
@@ -204,8 +223,8 @@ export function FeeCollectionClient() {
                   {admissionDateMode === "all"
                     ? "Paid Admissions (All Time)"
                     : admissionDateMode === "range"
-                    ? "Paid Admissions In Range"
-                    : "Paid Admissions On Date"}
+                      ? "Paid Admissions In Range"
+                      : "Paid Admissions On Date"}
                 </p>
                 <div className="flex h-7 items-center">
                   {isFetchingStats ? (
@@ -230,15 +249,18 @@ export function FeeCollectionClient() {
                   {admissionDateMode === "all"
                     ? "Total Collected (All Time)"
                     : admissionDateMode === "range"
-                    ? "Collected In Range"
-                    : "Collected On Date"}
+                      ? "Collected In Range"
+                      : "Collected On Date"}
                 </p>
                 <div className="flex h-7 items-center">
                   {isFetchingStats ? (
                     <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
                   ) : (
                     <p className="text-xl font-black text-slate-800">
-                      ₹{(globalStats?.totalCollected || 0).toLocaleString("en-IN")}
+                      ₹
+                      {(globalStats?.totalCollected || 0).toLocaleString(
+                        "en-IN",
+                      )}
                     </p>
                   )}
                 </div>
@@ -263,7 +285,153 @@ export function FeeCollectionClient() {
           </div>
         )}
 
-        <h1 className="text-2xl font-black mb-6 text-slate-800">
+        {/* Payment View Section */}
+        <div className="mb-4 flex flex-col gap-4 rounded-md border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end mt-8">
+          <div className="w-full md:w-44">
+            <p className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-700">
+              Payment View
+            </p>
+            <Select
+              value={paymentDateMode}
+              onValueChange={(value) =>
+                setPaymentDateMode(value as AdmissionDateMode)
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="date">Date Wise</SelectItem>
+                <SelectItem value="range">Date Range</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {paymentDateMode === "date" ? (
+            <div className="w-full md:w-52">
+              <label
+                className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-700"
+                htmlFor="payment-date"
+              >
+                Date
+              </label>
+              <Input
+                id="payment-date"
+                type="date"
+                value={paymentDate}
+                onChange={(event) => setPaymentDate(event.target.value)}
+              />
+            </div>
+          ) : paymentDateMode === "range" ? (
+            <>
+              <div className="w-full md:w-52">
+                <label
+                  className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-700"
+                  htmlFor="payment-date-from"
+                >
+                  From
+                </label>
+                <Input
+                  id="payment-date-from"
+                  type="date"
+                  value={paymentDateFrom}
+                  onChange={(event) => setPaymentDateFrom(event.target.value)}
+                />
+              </div>
+
+              <div className="w-full md:w-52">
+                <label
+                  className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-700"
+                  htmlFor="payment-date-to"
+                >
+                  To
+                </label>
+                <Input
+                  id="payment-date-to"
+                  type="date"
+                  min={paymentDateFrom}
+                  value={paymentDateTo}
+                  onChange={(event) => setPaymentDateTo(event.target.value)}
+                />
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        {/* Payment Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card className="shadow-sm border-slate-200">
+            <CardContent className="p-4 flex items-center space-x-4">
+              <div className="p-3 bg-cyan-50 text-cyan-600 rounded-lg">
+                <UserPlus size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  {paymentDateMode === "all"
+                    ? "Total Payments (All Time)"
+                    : paymentDateMode === "range"
+                      ? "Payments In Range"
+                      : "Payments On Date"}
+                </p>
+                <div className="flex h-7 items-center">
+                  {isFetchingPaymentStats ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                  ) : (
+                    <p className="text-xl font-black text-slate-800">
+                      {paymentStats?.totalPayments || 0}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-slate-200">
+            <CardContent className="p-4 flex items-center space-x-4">
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                <Wallet size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  {paymentDateMode === "all"
+                    ? "Total Collected (All Time)"
+                    : paymentDateMode === "range"
+                      ? "Collected In Range"
+                      : "Collected On Date"}
+                </p>
+                <div className="flex h-7 items-center">
+                  {isFetchingPaymentStats ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                  ) : (
+                    <p className="text-xl font-black text-slate-800">
+                      ₹
+                      {(paymentStats?.totalAmount || 0).toLocaleString("en-IN")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Payments by Date Table */}
+        {paymentDateMode !== "all" && (
+          <div className="mb-8">
+            {isLoadingPayments ? (
+              <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                <p className="text-sm text-slate-500 font-medium">
+                  Loading payments...
+                </p>
+              </div>
+            ) : paymentsByDate ? (
+              <PaymentDateTable payments={paymentsByDate} />
+            ) : null}
+          </div>
+        )}
+
+        <h1 className="text-2xl font-black mb-6 text-slate-800 mt-12">
           Fee Collection Report
         </h1>
 
@@ -316,7 +484,8 @@ export function FeeCollectionClient() {
                     {isAllCourses
                       ? allBatches.map((batch) => (
                           <SelectItem key={batch.id} value={batch.id}>
-                            {batch.courseName} — {batch.academicSession?.name || "Unknown Session"}
+                            {batch.courseName} —{" "}
+                            {batch.academicSession?.name || "Unknown Session"}
                           </SelectItem>
                         ))
                       : selectedCourse?.batches.map((batch) => (

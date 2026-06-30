@@ -190,14 +190,6 @@ export async function getGlobalFeeStats(filter?: AdmissionDateFilter) {
           ),
         );
 
-    const paymentDateFilter = isAllTime
-      ? eq(StudentFeePaymentTable.status, "Success")
-      : and(
-          eq(StudentFeePaymentTable.status, "Success"),
-          gte(StudentFeePaymentTable.createdAt, admissionDateRange.start),
-          lt(StudentFeePaymentTable.createdAt, admissionDateRange.end),
-        );
-
     const [{ count: studentCount }] = await db
       .select({ count: sql`count(*)`.mapWith(Number) })
       .from(EnrolledStudentTable)
@@ -213,7 +205,19 @@ export async function getGlobalFeeStats(filter?: AdmissionDateFilter) {
         sum: sql`sum(${StudentFeePaymentTable.amount})`.mapWith(Number),
       })
       .from(StudentFeePaymentTable)
-      .where(paymentDateFilter);
+      .innerJoin(
+        AdmittedStudentTable,
+        eq(StudentFeePaymentTable.studentId, AdmittedStudentTable.id),
+      )
+      .where(
+        isAllTime
+          ? eq(StudentFeePaymentTable.status, "Success")
+          : and(
+              eq(StudentFeePaymentTable.status, "Success"),
+              gte(AdmittedStudentTable.createdAt, admissionDateRange.start),
+              lt(AdmittedStudentTable.createdAt, admissionDateRange.end),
+            ),
+      );
 
     return {
       success: true,
@@ -249,9 +253,23 @@ export async function getAdmissionsByDate(filter: AdmissionDateFilter) {
       where: and(
         gte(AdmittedStudentTable.createdAt, admissionDateRange.start),
         lt(AdmittedStudentTable.createdAt, admissionDateRange.end),
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(StudentFeePaymentTable)
+            .where(
+              and(
+                eq(
+                  StudentFeePaymentTable.studentId,
+                  sql`"AdmittedStudentTable"."id"`,
+                ),
+                eq(StudentFeePaymentTable.status, "Success"),
+              ),
+            ),
+        ),
       ),
       with: {
-        feePayments: true,
+        feePayments: { where: eq(StudentFeePaymentTable.status, "Success") },
       },
       orderBy: (s, { asc }) => [asc(s.createdAt)],
     });
@@ -262,6 +280,97 @@ export async function getAdmissionsByDate(filter: AdmissionDateFilter) {
     return {
       success: false,
       message: getErrorMessage(error, "Failed to fetch admissions by date"),
+    };
+  }
+}
+
+export async function getPaymentsByDate(filter: AdmissionDateFilter) {
+  try {
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+    if (filter.mode === "all") {
+      return { success: false, message: "Date filter is required" };
+    }
+
+    const paymentDateRange = getAdmissionDateRange(filter);
+
+    const payments = await db.query.StudentFeePaymentTable.findMany({
+      where: and(
+        eq(StudentFeePaymentTable.status, "Success"),
+        gte(StudentFeePaymentTable.createdAt, paymentDateRange.start),
+        lt(StudentFeePaymentTable.createdAt, paymentDateRange.end),
+      ),
+      with: {
+        student: {
+          with: { batch: { with: { course: true, academicSession: true } } },
+        },
+      },
+      orderBy: (p, { asc }) => [asc(p.createdAt)],
+    });
+
+    return { success: true, data: payments };
+  } catch (error) {
+    console.error("[getPaymentsByDate] Error:", error);
+    return {
+      success: false,
+      message: getErrorMessage(error, "Failed to fetch payments by date"),
+    };
+  }
+}
+
+export async function getPaymentStats(filter?: AdmissionDateFilter) {
+  try {
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+    const isAllTime = filter?.mode === "all";
+    const paymentDateRange = getAdmissionDateRange(filter);
+
+    const [{ count: totalPayments }] = await db
+      .select({ count: sql`count(*)`.mapWith(Number) })
+      .from(StudentFeePaymentTable)
+      .where(
+        isAllTime
+          ? eq(StudentFeePaymentTable.status, "Success")
+          : and(
+              eq(StudentFeePaymentTable.status, "Success"),
+              gte(StudentFeePaymentTable.createdAt, paymentDateRange.start),
+              lt(StudentFeePaymentTable.createdAt, paymentDateRange.end),
+            ),
+      );
+
+    const [{ sum: totalAmount }] = await db
+      .select({
+        sum: sql`sum(${StudentFeePaymentTable.amount})`.mapWith(Number),
+      })
+      .from(StudentFeePaymentTable)
+      .where(
+        isAllTime
+          ? eq(StudentFeePaymentTable.status, "Success")
+          : and(
+              eq(StudentFeePaymentTable.status, "Success"),
+              gte(StudentFeePaymentTable.createdAt, paymentDateRange.start),
+              lt(StudentFeePaymentTable.createdAt, paymentDateRange.end),
+            ),
+      );
+
+    return {
+      success: true,
+      data: {
+        totalPayments: totalPayments || 0,
+        totalAmount: totalAmount || 0,
+      },
+    };
+  } catch (error) {
+    console.error("[getPaymentStats] Error:", error);
+    return {
+      success: false,
+      message: getErrorMessage(error, "Failed to fetch payment stats"),
     };
   }
 }

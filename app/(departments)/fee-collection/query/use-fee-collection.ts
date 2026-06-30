@@ -4,6 +4,8 @@ import {
   getFeeCollectionReport,
   getFilterOptions,
   getGlobalFeeStats,
+  getPaymentsByDate,
+  getPaymentStats,
 } from "../lib/action";
 
 interface AdmissionDateFilter {
@@ -81,6 +83,47 @@ export function useAdmissionsByDate(filter: AdmissionDateFilter) {
       return res.data;
     },
     enabled: isDateSelected,
+    retry: false,
+  });
+}
+
+export function usePaymentsByDate(filter: AdmissionDateFilter) {
+  const isDateSelected = filter.mode !== "all";
+
+  return useQuery({
+    queryKey: [
+      "payments-by-date",
+      filter.mode,
+      filter.admissionDateFrom,
+      filter.admissionDateTo,
+    ],
+    queryFn: async () => {
+      const res = await getPaymentsByDate(filter);
+      if (!res.success) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    },
+    enabled: isDateSelected,
+    retry: false,
+  });
+}
+
+export function usePaymentStats(filter?: AdmissionDateFilter) {
+  return useQuery({
+    queryKey: [
+      "payment-stats",
+      filter?.mode,
+      filter?.admissionDateFrom,
+      filter?.admissionDateTo,
+    ],
+    queryFn: async () => {
+      const res = await getPaymentStats(filter);
+      if (!res.success) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    },
     retry: false,
   });
 }

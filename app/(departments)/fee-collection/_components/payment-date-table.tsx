@@ -14,21 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { IconDownload } from "@tabler/icons-react";
 
-interface AdmissionDateTableProps {
-  students: any[];
+interface PaymentDateTableProps {
+  payments: any[];
 }
 
-export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
-  const totalFeeCollected = useMemo(() => {
-    let total = 0;
-    students.forEach((student) => {
-      const payment = student.feePayments?.[0];
-      if (payment) {
-        total += Number(payment.amount) || 0;
-      }
-    });
-    return total;
-  }, [students]);
+export function PaymentDateTable({ payments }: PaymentDateTableProps) {
+  const totalAmountCollected = useMemo(() => {
+    return payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  }, [payments]);
 
   const handleExportCSV = () => {
     const headers = [
@@ -37,33 +30,37 @@ export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
       "UAN",
       "Student Name",
       "Phone",
-      "Gender",
-      "Caste",
-      "Fee Paid",
+      "Course Name",
+      "Batch / Session",
+      "Semester",
+      "Amount Paid",
       "Payment Mode",
       "Transaction ID",
       "Payment Date",
       "Admission Date",
     ];
 
-    const rows = students.map((student, index) => {
-      const payment = student.feePayments?.[0];
+    const rows = payments.map((payment, index) => {
+      const student = payment.student;
+      const courseName = student?.batch?.course?.name ?? "N/A";
+      const batchSession = student?.batch?.academicSession?.name ?? "N/A";
 
       return [
         index + 1,
-        student.collegeRoll,
-        student.UAN,
-        `"${student.name}"`,
-        student.phone,
-        student.gender,
-        student.caste,
-        payment?.amount ?? 0,
-        payment?.paymentMode ?? "N/A",
-        payment?.transactionId ?? "N/A",
-        payment
-          ? new Date(payment.createdAt).toLocaleDateString("en-IN")
+        student?.collegeRoll ?? "N/A",
+        student?.UAN ?? "N/A",
+        `"${student?.name ?? "N/A"}"`,
+        student?.phone ?? "N/A",
+        `"${courseName}"`,
+        `"${batchSession}"`,
+        `"Semester ${payment.semesterCount}"`,
+        payment.amount,
+        payment.paymentMode,
+        payment.transactionId,
+        new Date(payment.createdAt).toLocaleDateString("en-IN"),
+        student?.createdAt
+          ? new Date(student.createdAt).toLocaleDateString("en-IN")
           : "N/A",
-        new Date(student.createdAt).toLocaleDateString("en-IN"),
       ].join(",");
     });
 
@@ -74,7 +71,7 @@ export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
     link.href = url;
     link.setAttribute(
       "download",
-      `paid_admissions_report_${new Date().getTime()}.csv`,
+      `payments_collected_report_${new Date().getTime()}.csv`,
     );
     document.body.appendChild(link);
     link.click();
@@ -86,18 +83,18 @@ export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-800">
-            Paid Admissions List
+            Payments Received List
           </h2>
           <p className="text-sm text-slate-500">
-            {students.length} student{students.length !== 1 ? "s" : ""} — Fee
-            Collected: ₹{totalFeeCollected.toLocaleString("en-IN")}
+            {payments.length} payment{payments.length !== 1 ? "s" : ""} — Total
+            Collected: ₹{totalAmountCollected.toLocaleString("en-IN")}
           </p>
         </div>
         <Button
           onClick={handleExportCSV}
           variant="outline"
           className="gap-2"
-          disabled={students.length === 0}
+          disabled={payments.length === 0}
         >
           <IconDownload size={16} />
           Export to CSV
@@ -112,8 +109,10 @@ export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
               <TableHead>College Roll</TableHead>
               <TableHead>Student Name</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Fee Paid</TableHead>
+              <TableHead>Course</TableHead>
+              <TableHead>Session / Batch</TableHead>
+              <TableHead>Semester</TableHead>
+              <TableHead>Amount Paid</TableHead>
               <TableHead>Mode</TableHead>
               <TableHead>Transaction ID</TableHead>
               <TableHead>Payment Date</TableHead>
@@ -121,76 +120,81 @@ export function AdmissionDateTable({ students }: AdmissionDateTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length === 0 ? (
+            {payments.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={10}
+                  colSpan={12}
                   className="text-center text-muted-foreground h-32"
                 >
-                  No paid admissions found for the selected date.
+                  No payments found for the selected date.
                 </TableCell>
               </TableRow>
             ) : (
-              students.map((student, index) => {
-                const payment = student.feePayments?.[0];
+              payments.map((payment, index) => {
+                const student = payment.student;
+                const courseName = student?.batch?.course?.name ?? "N/A";
+                const batchSession =
+                  student?.batch?.academicSession?.name ?? "N/A";
 
                 return (
-                  <TableRow key={student.id}>
+                  <TableRow key={payment.id}>
                     <TableCell className="text-sm text-slate-500">
                       {index + 1}
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {student.collegeRoll}
+                      {student?.collegeRoll ?? "-"}
                     </TableCell>
                     <TableCell className="font-medium">
-                      <div>{student.name}</div>
+                      <div>{student?.name ?? "-"}</div>
                       <div className="text-xs text-muted-foreground">
-                        {student.UAN}
+                        {student?.UAN ?? "-"}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">{student.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {student.gender}
+                    <TableCell className="text-sm">
+                      {student?.phone ?? "-"}
+                    </TableCell>
+                    <TableCell className="text-sm">{courseName}</TableCell>
+                    <TableCell className="text-sm">{batchSession}</TableCell>
+                    <TableCell className="text-sm">
+                      <Badge variant="secondary" className="text-xs">
+                        Semester {payment.semesterCount}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold text-emerald-700">
-                      {payment
-                        ? `₹${Number(payment.amount).toLocaleString("en-IN")}`
-                        : "-"}
+                      ₹{Number(payment.amount).toLocaleString("en-IN")}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {payment?.paymentMode ?? "-"}
+                      {payment.paymentMode}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {payment?.transactionId ?? "-"}
+                      {payment.transactionId}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {payment
-                        ? new Date(payment.createdAt).toLocaleDateString(
+                      {new Date(payment.createdAt).toLocaleDateString("en-IN")}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {student?.createdAt
+                        ? new Date(student.createdAt).toLocaleDateString(
                             "en-IN",
                           )
                         : "-"}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {new Date(student.createdAt).toLocaleDateString("en-IN")}
                     </TableCell>
                   </TableRow>
                 );
               })
             )}
           </TableBody>
-          {students.length > 0 && (
+          {payments.length > 0 && (
             <TableFooter>
               <TableRow className="bg-slate-50/70">
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="font-bold text-slate-800 text-right pr-4"
                 >
-                  Total (Students: {students.length})
+                  Total (Payments: {payments.length})
                 </TableCell>
                 <TableCell className="font-bold text-emerald-800">
-                  ₹{totalFeeCollected.toLocaleString("en-IN")}
+                  ₹{totalAmountCollected.toLocaleString("en-IN")}
                 </TableCell>
                 <TableCell colSpan={4} />
               </TableRow>

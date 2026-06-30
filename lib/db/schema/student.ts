@@ -273,11 +273,10 @@ export const enrolledStudentRelations = relations(
 export const admittedStudentRelations = relations(
   AdmittedStudentTable,
   ({ one, many }) => ({
-    // currentSemester: one(semesterTable, {
-    //   fields: [AdmittedStudentTable.currentSemesterId],
-    //   references: [semesterTable.id],
-    // }),
-
+    batch: one(batchTable, {
+      fields: [AdmittedStudentTable.batchId],
+      references: [batchTable.id],
+    }),
     previousAcademicRecord: one(StudentPreviousAcademicRecordTable),
 
     documents: one(StudentDocumentsTable),
