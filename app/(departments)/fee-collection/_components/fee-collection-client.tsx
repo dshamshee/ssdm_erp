@@ -36,7 +36,7 @@ function getDateInputValue(date: Date) {
 
 export function FeeCollectionClient() {
   const todayDate = getDateInputValue(new Date());
-  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("all");
   const [selectedBatchId, setSelectedBatchId] = useState<string>("");
   const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [admissionDateMode, setAdmissionDateMode] =
@@ -60,8 +60,23 @@ export function FeeCollectionClient() {
   const { data: globalStats, isFetching: isFetchingStats } = useGlobalFeeStats(admissionDateFilter);
   const { data: courses, isLoading: isLoadingOptions } = useFilterOptions();
 
+  const isAllCourses = selectedCourseId === "all";
   const selectedCourse = courses?.find((c) => c.id === selectedCourseId);
-  const totalSemesters = selectedCourse ? selectedCourse.duration * 2 : 0;
+
+  const allBatches = isAllCourses
+    ? (courses ?? []).flatMap((c) =>
+        c.batches.map((b) => ({
+          ...b,
+          courseName: c.name,
+        })),
+      )
+    : [];
+
+  const totalSemesters = isAllCourses
+    ? Math.max(0, ...(courses ?? []).map((c) => c.duration * 2))
+    : selectedCourse
+      ? selectedCourse.duration * 2
+      : 0;
   const semesterOptions = Array.from({ length: totalSemesters }, (_, index) =>
     String(index + 1),
   );
@@ -253,6 +268,7 @@ export function FeeCollectionClient() {
                     <SelectValue placeholder="Select Course" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">All Course</SelectItem>
                     {courses?.map((course) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.name}
@@ -272,17 +288,23 @@ export function FeeCollectionClient() {
                     setSelectedBatchId(val);
                     setSelectedSemester("");
                   }}
-                  disabled={!selectedCourseId}
+                  disabled={!selectedCourseId || isLoadingOptions}
                 >
                   <SelectTrigger className="h-11">
                     <SelectValue placeholder="Select Session" />
                   </SelectTrigger>
                   <SelectContent>
-                    {selectedCourse?.batches.map((batch) => (
-                      <SelectItem key={batch.id} value={batch.id}>
-                        {batch.academicSession?.name || "Unknown Session"}
-                      </SelectItem>
-                    ))}
+                    {isAllCourses
+                      ? allBatches.map((batch) => (
+                          <SelectItem key={batch.id} value={batch.id}>
+                            {batch.courseName} — {batch.academicSession?.name || "Unknown Session"}
+                          </SelectItem>
+                        ))
+                      : selectedCourse?.batches.map((batch) => (
+                          <SelectItem key={batch.id} value={batch.id}>
+                            {batch.academicSession?.name || "Unknown Session"}
+                          </SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               </div>
