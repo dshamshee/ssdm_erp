@@ -5,6 +5,7 @@ import { fetchDashboardData } from "./query/fetch-dashboard-data";
 import { DashboardBanner } from "./_components/dashboard-banner";
 import { CongratulationsCard } from "./_components/congratulations-card";
 import { AcademicProfileGrid } from "./_components/academic-profile-grid";
+import { CompleteProfileBanner } from "./_components/complete-profile-banner";
 
 export default async function StudentDashboardPage() {
   const result = await fetchDashboardData();
@@ -45,6 +46,17 @@ export default async function StudentDashboardPage() {
   }
 
   const { student, batch } = result.data!;
+
+  // If profile is incomplete, show the completion banner instead of the full dashboard
+  if (!student.isProfileCompleted) {
+    return (
+      <ContentLayout title="Complete Your Profile">
+        <div className="max-w-5xl mx-auto space-y-8 p-1 sm:p-4">
+          <CompleteProfileBanner student={student} batch={batch} />
+        </div>
+      </ContentLayout>
+    );
+  }
 
   return (
     <ContentLayout title="Student Dashboard">

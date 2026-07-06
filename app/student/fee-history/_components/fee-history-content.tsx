@@ -1,5 +1,7 @@
 "use client";
 
+import { IconAlertTriangle, IconArrowRight } from "@tabler/icons-react";
+import Link from "next/link";
 import { useGetStudentFeeData } from "../query/get-student-fee-data";
 import { CurrentSemesterFeeCard } from "./current-semester-fee-card";
 import { NextSemesterFeeCard } from "./next-semester-fee-card";
@@ -65,6 +67,36 @@ export function FeeHistoryContent() {
     nextSemesterCount,
   } = data;
 
+  // If profile is incomplete, show a message to complete profile first
+  if (!student.isProfileCompleted) {
+    return (
+      <div className="bg-amber-50 border border-amber-200/60 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="h-12 w-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+            <IconAlertTriangle className="h-6 w-6" />
+          </div>
+          <div className="text-center sm:text-left space-y-1 flex-grow">
+            <h3 className="text-sm font-extrabold text-slate-800">
+              Profile Incomplete
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Please complete your profile before accessing fee history and
+              payment features. Your fee records will be available after your
+              profile is verified.
+            </p>
+          </div>
+          <Link
+            href="/student/complete-profile"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black shadow-lg shadow-amber-600/10 hover:shadow-amber-600/20 active:scale-[0.98] transition-all"
+          >
+            Complete Profile
+            <IconArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const showNextSemesterCard =
     hasPaid && nextSemesterAdmission && nextSemesterFees;
 
@@ -99,3 +131,4 @@ export function FeeHistoryContent() {
     </div>
   );
 }
+

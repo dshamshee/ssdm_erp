@@ -105,12 +105,12 @@ export function getMenuList(pathname: string): Group[] {
         //     pathname.startsWith("/admission/payment") ||
         //     pathname.startsWith("/admission/verify"),
         // },
-        {
-          href: "/promote-students",
-          label: "Promote Students",
-          icon: IconTrendingUp,
-          active: pathname.startsWith("/promote-students"),
-        },
+        // {
+        //   href: "/promote-students",
+        //   label: "Promote Students",
+        //   icon: IconTrendingUp,
+        //   active: pathname.startsWith("/promote-students"),
+        // },
         {
           href: "/student-records",
           label: "Student Records",
