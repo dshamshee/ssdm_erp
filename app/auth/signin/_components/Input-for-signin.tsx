@@ -23,12 +23,12 @@ export function InputForSignin({
         name="identifier"
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel required>Email or UAN</FieldLabel>
+            <FieldLabel required>Application No. / University Roll No.</FieldLabel>
             <FieldContent>
               <Input
                 {...field}
                 aria-invalid={fieldState.invalid}
-                placeholder="Enter your Email or UAN number"
+                placeholder="Enter your Application No. or University Roll No."
               />
               <FieldError errors={[fieldState.error]} />
             </FieldContent>
