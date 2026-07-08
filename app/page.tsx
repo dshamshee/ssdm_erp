@@ -151,12 +151,12 @@ export default async function Page() {
               >
                 Apply for Admission 2026-27
               </Link>
-              <Link
+              {/* <Link
                 href="/auth/signin"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-center"
               >
                 Admission for semester 7th
-              </Link>
+              </Link> */}
               <Link
                 href="#about"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl text-sm font-bold bg-white/10 text-white border border-white/20 hover:bg-white/15 backdrop-blur-sm transition-all text-center"
