@@ -36,7 +36,8 @@ function generateStudentPassword(name: string, aadharNumber: string): string {
  * Format: uan@student.ssdm.local
  */
 function generateStudentEmail(uan: string): string {
-  return `${uan.toLowerCase()}@student.ssdm.local`;
+  // Strip non-alphanumeric chars (including invisible Unicode from spreadsheet paste)
+  return `${uan.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}@student.ssdm.local`;
 }
 
 /**

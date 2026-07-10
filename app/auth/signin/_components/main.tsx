@@ -35,7 +35,7 @@ export function MainSigninForm() {
     const isEmail = rawIdentifier.includes("@");
     const email = isEmail
       ? rawIdentifier
-      : `${rawIdentifier.toLowerCase()}@student.ssdm.local`;
+      : `${rawIdentifier.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}@student.ssdm.local`;
 
     const { data: authData, error } = await signIn.email({
       email,

@@ -19,7 +19,9 @@ import { user } from "@/lib/db/schema/auth-schema";
  * Format: uan@student.ssdm.local
  */
 function generateStudentEmail(uan: string): string {
-  return `${uan.toLowerCase()}@student.ssdm.local`;
+  // Strip ALL non-alphanumeric chars (including zero-width spaces from spreadsheet copy-paste)
+  const cleanUAN = uan.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  return `${cleanUAN}@student.ssdm.local`;
 }
 
 /**
@@ -28,7 +30,8 @@ function generateStudentEmail(uan: string): string {
  * If name has 3 or fewer characters, use last 5 chars of UAN instead.
  */
 function generateStudentPassword(name: string, uan: string): string {
-  const cleanName = name.replace(/\s+/g, "").toLowerCase();
+  // Keep only alphabetic chars (strips invisible Unicode from spreadsheet paste)
+  const cleanName = name.replace(/[^a-zA-Z]/g, "").toLowerCase();
   const cleanUAN = uan.replace(/[^a-zA-Z0-9]/g, "");
   if (cleanName.length <= 3) {
     return `${cleanName}${cleanUAN.slice(-5)}`;
@@ -39,22 +42,28 @@ function generateStudentPassword(name: string, uan: string): string {
 // ─── ZOD SCHEMA ─────────────────────────────────────────────────────────────────
 
 const oldStudentItemSchema = z.object({
-  UAN: z.string().min(1, "UAN is required"),
-  name: z.string().min(1, "Student name is required"),
-  fathersName: z.string().min(1, "Father's name is required"),
+  UAN: z
+    .string()
+    .trim()
+    .transform((val) => val.replace(/[^a-zA-Z0-9]/g, "")) // Strip invisible Unicode chars from spreadsheet copy-paste
+    .pipe(z.string().min(1, "UAN is required")),
+  name: z.string().trim().min(1, "Student name is required"),
+  fathersName: z.string().trim().min(1, "Father's name is required"),
   registrationNumber: z
     .string()
+    .trim()
     .optional()
     .nullable()
     .transform((val) => val || null),
   universityRoll: z
     .string()
+    .trim()
     .optional()
     .nullable()
     .transform((val) => val || null),
-  MJC: z.string().min(1, "Major Subject (MJC) is required"),
+  MJC: z.string().trim().min(1, "Major Subject (MJC) is required"),
   semester: z.number().int().min(1, "Semester must be at least 1"),
-  batchId: z.string().min(1, "Batch ID is required"),
+  batchId: z.string().trim().min(1, "Batch ID is required"),
   admissionType: z
     .enum(["MERIT", "SPORT", "MANAGEMENT QUOTA", "OTHER", ""])
     .optional()
@@ -67,6 +76,7 @@ const oldStudentItemSchema = z.object({
     .transform((val) => (val === "" ? "Male" : val || "Male")),
   reservation: z
     .string()
+    .trim()
     .optional()
     .nullable()
     .transform((val) => val || null),
