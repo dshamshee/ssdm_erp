@@ -2,10 +2,12 @@ import { IconAlertCircle } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
 import { ContentLayout } from "@/components/content-layout";
 import { fetchDashboardData } from "./query/fetch-dashboard-data";
+import { checkPendingFee } from "./query/check-pending-fee";
 import { DashboardBanner } from "./_components/dashboard-banner";
 import { CongratulationsCard } from "./_components/congratulations-card";
 import { AcademicProfileGrid } from "./_components/academic-profile-grid";
 import { CompleteProfileBanner } from "./_components/complete-profile-banner";
+import { FeePaymentPopup } from "./_components/fee-payment-popup";
 
 export default async function StudentDashboardPage() {
   const result = await fetchDashboardData();
@@ -58,9 +60,27 @@ export default async function StudentDashboardPage() {
     );
   }
 
+  // Check if the student has any pending fee for their current semester
+  const feeStatus = await checkPendingFee(
+    student.id,
+    student.currentSemesterCount,
+    student.batchId,
+    student.isPassed,
+  );
+
   return (
     <ContentLayout title="Student Dashboard">
       <div className="max-w-5xl mx-auto space-y-8 p-1 sm:p-4">
+        {/* Fee Payment Popup — auto-opens when fees are pending */}
+        {feeStatus.hasPendingFee && (
+          <FeePaymentPopup
+            studentName={student.name}
+            studentId={student.id}
+            semesterCount={student.currentSemesterCount}
+            isAdmissionOpen={feeStatus.isAdmissionOpen}
+          />
+        )}
+
         {/* Welcome Premium Gradient Banner */}
         <DashboardBanner student={student} batch={batch} />
 
@@ -73,3 +93,4 @@ export default async function StudentDashboardPage() {
     </ContentLayout>
   );
 }
+
