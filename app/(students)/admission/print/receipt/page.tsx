@@ -2,6 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getCollegeConfig } from "@/lib/college-config";
 import { db } from "@/lib/db";
+
 import {
   admissionOpenTable,
   batchTable,
@@ -104,7 +105,7 @@ export default async function PrintableReceiptPage({
           Affiliated with University • Government Registered Institution
         </p>
         <p className="text-xs text-slate-500 font-mono">
-          Email: support@ssdmcollege.ac.in • Web: www.ssdmcollege.ac.in
+          Email: {getCollegeConfig().email} • Web: santsandhyadasmahilacollege.org
         </p>
       </div>
 
