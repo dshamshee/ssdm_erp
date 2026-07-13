@@ -52,16 +52,16 @@ function generateStudentPassword(name: string, uan: string): string {
 // ─── ZOD SCHEMA ─────────────────────────────────────────────────────────────────
 
 /**
- * Request body validation for the signup endpoint.
+ * Request body validation for the bulk signup endpoint.
  *
- * Expected JSON payload:
+ * Expected JSON payload: an array of objects, each containing:
  *   {
- *     "UAN": "AB/2023/1234",        — Student's University Application Number
- *     "session": "2023-2027",        — Academic session (for reference only, stored in response)
- *     "semesterCount": 5             — Which semester the student is currently in
+ *     "UAN": "AB/2023/1234",
+ *     "session": "2023-2027",
+ *     "semesterCount": 5
  *   }
  */
-const signupAdmittedStudentSchema = z.object({
+const signupStudentItemSchema = z.object({
   UAN: z
     .string()
     .trim()
@@ -77,20 +77,22 @@ const signupAdmittedStudentSchema = z.object({
     .min(1, "Semester count must be at least 1"),
 });
 
+const signupAdmittedStudentsSchema = z.array(signupStudentItemSchema).min(1, "At least one student is required");
+
 // ─── POST HANDLER ───────────────────────────────────────────────────────────────
 
 /**
  * POST /api/dev/signup-admitted-student
  *
- * Creates a Better Auth login account for a single admitted student.
+ * Creates Better Auth login accounts for multiple admitted students.
  *
- * Flow:
- *   1. Parse & validate the request body (UAN, session, semesterCount)
- *   2. Find the student in AdmittedStudentTable by UAN
- *   3. Update the student's current semester count
- *   4. Generate login credentials (synthetic email + password)
+ * Flow (per student):
+ *   1. Find the student in AdmittedStudentTable by UAN
+ *   2. Update the student's current semester count
+ *   3. Generate login credentials (synthetic email + password)
+ *   4. Skip if auth account already exists
  *   5. Create the Better Auth user account with role "student"
- *   6. Return the generated login credentials in the response
+ *   6. Collect results (created / skipped)
  */
 export async function POST(req: Request) {
   try {
@@ -105,8 +107,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Validate the payload against our Zod schema (UAN, session, semesterCount)
-    const parsed = signupAdmittedStudentSchema.safeParse(body);
+    // 2. Validate the payload against our Zod schema (array of students)
+    const parsed = signupAdmittedStudentsSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -121,80 +123,80 @@ export async function POST(req: Request) {
       );
     }
 
-    const { UAN, session, semesterCount } = parsed.data;
+    const students = parsed.data;
+    const created: Array<{
+      UAN: string;
+      name: string;
+      session: string;
+      semesterCount: number;
+      loginEmail: string;
+      loginPassword: string;
+    }> = [];
+    const skipped: Array<{ UAN: string; reason: string }> = [];
 
-    // 3. Look up the student in AdmittedStudentTable using their UAN
-    const student = await db.query.AdmittedStudentTable.findFirst({
-      where: eq(AdmittedStudentTable.UAN, UAN),
-    });
+    // 3. Process each student
+    for (const { UAN, session, semesterCount } of students) {
+      // Look up the student in AdmittedStudentTable
+      const student = await db.query.AdmittedStudentTable.findFirst({
+        where: eq(AdmittedStudentTable.UAN, UAN),
+      });
 
-    if (!student) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `No admitted student found with UAN: ${UAN}`,
-        },
-        { status: 404 },
-      );
+      if (!student) {
+        skipped.push({ UAN, reason: "No admitted student found" });
+        continue;
+      }
+
+      // Update semester count
+      await db
+        .update(AdmittedStudentTable)
+        .set({ currentSemesterCount: semesterCount })
+        .where(eq(AdmittedStudentTable.id, student.id));
+
+      // Generate credentials
+      const email = generateStudentEmail(UAN);
+      const password = generateStudentPassword(student.name, UAN);
+
+      // Check for existing auth account
+      const existingUser = await db.query.user.findFirst({
+        where: eq(user.email, email),
+      });
+
+      if (existingUser) {
+        skipped.push({ UAN, reason: `Auth already exists (${email})` });
+        continue;
+      }
+
+      // Create Better Auth account
+      try {
+        await auth.api.signUpEmail({
+          body: { name: student.name, email, password, role: "student" },
+        });
+
+        console.log(`[Bulk Signup] Created auth for ${UAN} → ${email}`);
+
+        created.push({
+          UAN,
+          name: student.name,
+          session,
+          semesterCount,
+          loginEmail: email,
+          loginPassword: password,
+        });
+      } catch (signupErr) {
+        const msg = signupErr instanceof Error ? signupErr.message : "Unknown signup error";
+        skipped.push({ UAN, reason: msg });
+      }
     }
-
-    // 4. Update the student's current semester count in the database
-    await db
-      .update(AdmittedStudentTable)
-      .set({ currentSemesterCount: semesterCount })
-      .where(eq(AdmittedStudentTable.id, student.id));
-
-    // 5. Build the login credentials:
-    //    - email:    fake email derived from UAN (e.g. "ab20231234@student.ssdm.local")
-    //    - password: first4CharsOfName + last4DigitsOfUAN (e.g. "rahu1234")
-    const email = generateStudentEmail(UAN);
-    const password = generateStudentPassword(student.name, UAN);
-
-    // 6. Prevent duplicate accounts — check if this email already has a Better Auth user
-    const existingUser = await db.query.user.findFirst({
-      where: eq(user.email, email),
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Auth account already exists for UAN: ${UAN}. Login email: ${email}`,
-        },
-        { status: 409 },
-      );
-    }
-
-    // 7. Register the student in Better Auth with role "student"
-    await auth.api.signUpEmail({
-      body: {
-        name: student.name,
-        email,
-        password,
-        role: "student",
-      },
-    });
-
-    console.log(
-      `[Signup Admitted Student] Created auth for ${UAN} → ${email}`,
-    );
 
     return NextResponse.json({
       success: true,
-      message: `Auth account created successfully for ${student.name}`,
-      data: {
-        UAN,
-        name: student.name,
-        session,
-        semesterCount,
-        loginUsername: UAN,
-        loginEmail: email,
-        loginPassword: password,
-      },
+      message: `Created ${created.length} accounts, skipped ${skipped.length}`,
+      created,
+      skipped,
     });
   } catch (error) {
     const err = error as Error;
-    console.error("[Signup Admitted Student] Error:", err);
+    console.error("[Bulk Signup Admitted Student] Error:", err);
     return NextResponse.json(
       { success: false, message: err.message || "Internal Server Error" },
       { status: 500 },

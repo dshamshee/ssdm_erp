@@ -81,7 +81,7 @@ export default async function PrintableReceiptPage({
     where: eq(admissionOpenTable.batchId, student.batchId),
   });
 
-  const practicalFee = hasPractical ? (admissionOpen?.practicalFee ?? 500) : 0;
+  const practicalFee = hasPractical ? (admissionOpen?.practicalFee ?? 600) : 0;
   const totalAmount = Number(payment.amount);
   const lateFee = Math.max(0, totalAmount - tuitionFee - practicalFee);
 
