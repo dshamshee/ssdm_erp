@@ -25,7 +25,7 @@ const publicRoutes = [
   "/",
   "/auth",
   "/api/auth",
-  "/api/dev",
+  // "/api/dev",
   "/api/upload",
   "/api/payments",
   "/auth/signin",
