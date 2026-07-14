@@ -48,14 +48,18 @@ export default async function PrintableApplicationPage({
   }
 
   // Gather chosen subject IDs
-  const allSubjectIds = [
-    student.subMJC,
-    ...(student.subMIC || []),
-    ...(student.subMDC || []),
-    ...(student.subAEC || []),
-    ...(student.subSEC || []),
-    ...(student.subVAC || []),
-  ].filter(Boolean) as string[];
+  // Semester 7 students only have MJC and MIC subjects (no MDC, AEC, SEC, VAC)
+  const isSemester7 = student.currentSemesterCount === 7;
+  const allSubjectIds = isSemester7
+    ? ([student.subMJC, ...(student.subMIC || [])].filter(Boolean) as string[])
+    : ([
+        student.subMJC,
+        ...(student.subMIC || []),
+        ...(student.subMDC || []),
+        ...(student.subAEC || []),
+        ...(student.subSEC || []),
+        ...(student.subVAC || []),
+      ].filter(Boolean) as string[]);
 
   const subjects =
     allSubjectIds.length > 0
@@ -318,38 +322,42 @@ export default async function PrintableApplicationPage({
                   {getSubjectListText(student.subMIC)}
                 </td>
               </tr>
-              <tr>
-                <td className="px-4 py-2.5 font-bold text-slate-800">
-                  Multidisciplinary Course (MDC)
-                </td>
-                <td className="px-4 py-2.5 font-medium text-slate-700">
-                  {getSubjectListText(student.subMDC)}
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2.5 font-bold text-slate-800">
-                  Ability Enhancement Course (AEC)
-                </td>
-                <td className="px-4 py-2.5 font-medium text-slate-700">
-                  {getSubjectListText(student.subAEC)}
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2.5 font-bold text-slate-800">
-                  Skill Enhancement Course (SEC)
-                </td>
-                <td className="px-4 py-2.5 font-medium text-slate-700">
-                  {getSubjectListText(student.subSEC)}
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2.5 font-bold text-slate-800">
-                  Value Added Course (VAC)
-                </td>
-                <td className="px-4 py-2.5 font-medium text-slate-700">
-                  {getSubjectListText(student.subVAC)}
-                </td>
-              </tr>
+              {!isSemester7 && (
+                <>
+                  <tr>
+                    <td className="px-4 py-2.5 font-bold text-slate-800">
+                      Multidisciplinary Course (MDC)
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-slate-700">
+                      {getSubjectListText(student.subMDC)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2.5 font-bold text-slate-800">
+                      Ability Enhancement Course (AEC)
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-slate-700">
+                      {getSubjectListText(student.subAEC)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2.5 font-bold text-slate-800">
+                      Skill Enhancement Course (SEC)
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-slate-700">
+                      {getSubjectListText(student.subSEC)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2.5 font-bold text-slate-800">
+                      Value Added Course (VAC)
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-slate-700">
+                      {getSubjectListText(student.subVAC)}
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>

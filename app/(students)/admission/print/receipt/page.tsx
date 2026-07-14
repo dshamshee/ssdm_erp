@@ -58,14 +58,18 @@ export default async function PrintableReceiptPage({
   const tuitionFee = batch.perSemesterFee;
 
   // Check if student has practical subjects
-  const allSubjectIds = [
-    student.subMJC,
-    ...(student.subMIC || []),
-    ...(student.subMDC || []),
-    ...(student.subAEC || []),
-    ...(student.subSEC || []),
-    ...(student.subVAC || []),
-  ].filter(Boolean) as string[];
+  // Semester 7 students only have MJC and MIC subjects (no MDC, AEC, SEC, VAC)
+  const isSemester7 = payment.semesterCount === 7;
+  const allSubjectIds = isSemester7
+    ? ([student.subMJC, ...(student.subMIC || [])].filter(Boolean) as string[])
+    : ([
+        student.subMJC,
+        ...(student.subMIC || []),
+        ...(student.subMDC || []),
+        ...(student.subAEC || []),
+        ...(student.subSEC || []),
+        ...(student.subVAC || []),
+      ].filter(Boolean) as string[]);
 
   let hasPractical = false;
   if (allSubjectIds.length > 0) {
