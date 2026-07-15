@@ -10,9 +10,32 @@ import {
   departmentTable,
   StudentFeePaymentTable,
 } from "@/lib/db/schema";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
+
+async function getAdminSession() {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return { success: false as const, message: "Unauthorized" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "superAdmin") {
+    return { success: false as const, message: "Forbidden" };
+  }
+
+  return { success: true as const, data: session };
+}
 
 export async function getDCRStats() {
   try {
+
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
     const now = new Date();
     const startOfToday = new Date(
       now.getFullYear(),
@@ -128,6 +151,13 @@ export interface DCRFilters {
 
 export async function getDCRReport(filters: DCRFilters = {}) {
   try {
+
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+
     const { startDate, endDate, semester, departmentId, courseId, batchId } =
       filters;
 
@@ -215,6 +245,13 @@ export async function getDCRReport(filters: DCRFilters = {}) {
 
 export async function getDCRFilterOptions() {
   try {
+
+    const session = await getAdminSession();
+    if (!session.success) {
+      return session;
+    }
+
+
     const departments = await db
       .select({ id: departmentTable.id, name: departmentTable.name })
       .from(departmentTable);
